@@ -9,10 +9,9 @@ import Footer from "@/components/layout/Footer"; // <-- adjust the path if your 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VIDA Foundation",
-  description: "Pioneering Healthcare Education",
+  title: "Namoh Crockery Mart | Premium HORECA Solutions",
+  description: "Complete HORECA solutions for every need. Premium quality kitchenware, glassware, hotelware, and barware trusted by hospitality professionals.",
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
