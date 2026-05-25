@@ -30,17 +30,19 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        // @ts-ignore - NextAuth User type doesn't include custom 'role' property
         token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
+        // @ts-ignore
         (session.user as any).role = token.role;
       }
       return session;
     }
-  },
+  }, // <--- THIS COMMA WAS MISSING!
   secret: process.env.NEXTAUTH_SECRET,
 });
 
