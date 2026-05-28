@@ -33,7 +33,7 @@ export const config = {
   matcher: [
     "/profile/:path*",
     "/orders/:path*",
-    "/cart/:path*",
+    // "/cart/:path*", <-- Removed! Cart is now public.
     "/wishlist/:path*",
     "/checkout/:path*",
     "/admin/:path*" // If you build an admin dashboard later
