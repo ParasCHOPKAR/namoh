@@ -1,50 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Plus, Minus, ArrowRight, ShieldCheck, ShoppingCart } from "lucide-react";
-
-// Mock Data for UI demonstration
-const INITIAL_CART = [
-  {
-    id: "c1",
-    name: "Executive Chef's Knife - 8\" Damascus",
-    brand: "Global",
-    price: 6800,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1593618998160-e34014e67546?q=80&w=300&auto=format&fit=crop",
-  },
-  {
-    id: "c2",
-    name: "Stainless Steel Mixing Bowls (Set of 5)",
-    brand: "Borosil",
-    price: 1850,
-    quantity: 2,
-    image: "https://images.unsplash.com/photo-1622484211148-52213e4b77d6?q=80&w=300&auto=format&fit=crop",
-  }
-];
+import { useCart } from "@/context/CartContext"; // Import real cart data
 
 export default function CartPage() {
-  const [cart, setCart] = useState(INITIAL_CART);
+  // Grab the real cart data and functions from our Context!
+  const { cart, removeFromCart, updateQuantity } = useCart();
 
-  const updateQuantity = (id: string, delta: number) => {
-    setCart(cart.map(item => {
-      if (item.id === id) {
-        const newQuantity = item.quantity + delta;
-        return { ...item, quantity: newQuantity > 0 ? newQuantity : 1 };
-      }
-      return item;
-    }));
-  };
-
-  const removeItem = (id: string) => {
-    setCart(cart.filter(item => item.id !== id));
-  };
-
-  // Calculations
+  // Calculations based on REAL data
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const gst = subtotal * 0.18; // Assuming 18% GST for mock display
+  const gst = subtotal * 0.18; 
   const total = subtotal + gst;
 
   if (cart.length === 0) {
@@ -57,7 +25,7 @@ export default function CartPage() {
         <p className="text-zinc-500 mb-8 max-w-md mx-auto text-center font-medium">
           Ready to equip your kitchen? Browse our premium catalog and add some items to your cart.
         </p>
-        <Link href="/category/kitchenware" className="bg-[#0f1b2e] text-white px-10 py-4 rounded-2xl font-bold hover:bg-[#1a2b47] transition-all hover:shadow-xl hover:-translate-y-1">
+        <Link href="/category" className="bg-[#0f1b2e] text-white px-10 py-4 rounded-2xl font-bold hover:bg-[#1a2b47] transition-all hover:shadow-xl hover:-translate-y-1">
           Continue Shopping
         </Link>
       </div>
@@ -67,31 +35,26 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-[#f8f9fa] py-12 lg:py-16">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-        
         <h1 className="text-3xl lg:text-4xl font-extrabold text-[#0f1b2e] mb-10 tracking-tight">Shopping Cart</h1>
-
         <div className="flex flex-col lg:flex-row gap-10">
           
-          {/* LEFT: CART ITEMS */}
+          {/* LEFT: REAL CART ITEMS */}
           <div className="lg:w-2/3 flex flex-col gap-6">
             {cart.map((item) => (
               <div key={item.id} className="bg-white p-4 sm:p-6 rounded-[2rem] border border-zinc-200 shadow-sm flex flex-col sm:flex-row items-center gap-6 animate-in fade-in slide-in-from-bottom-4">
                 
-                {/* Product Image */}
                 <div className="relative w-full sm:w-32 h-32 rounded-xl overflow-hidden bg-zinc-50 shrink-0 border border-zinc-100">
                   <Image src={item.image} alt={item.name} fill className="object-cover" />
                 </div>
 
-                {/* Product Details */}
                 <div className="flex-1 flex flex-col text-center sm:text-left w-full">
                   <p className="text-[11px] font-bold text-[#c69c4e] tracking-widest uppercase mb-1">{item.brand}</p>
-                  <Link href={`/product/${item.id}`} className="text-[#0f1b2e] font-bold text-lg leading-tight hover:underline mb-2">
+                  <Link href={`/product/${item.id}`} className="text-[#0f1b2e] font-bold text-lg leading-tight hover:underline mb-2 line-clamp-2">
                     {item.name}
                   </Link>
                   <p className="text-zinc-500 font-medium text-sm mb-4">Price: ₹{item.price.toLocaleString()}</p>
                   
                   <div className="flex items-center justify-between mt-auto">
-                    {/* Quantity Controls */}
                     <div className="flex items-center bg-zinc-50 border border-zinc-200 rounded-xl p-1">
                       <button onClick={() => updateQuantity(item.id, -1)} className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-[#0f1b2e] hover:bg-zinc-200 rounded-lg transition-colors">
                         <Minus size={16} />
@@ -102,16 +65,11 @@ export default function CartPage() {
                       </button>
                     </div>
 
-                    {/* Total & Remove */}
                     <div className="flex items-center gap-6">
                       <span className="font-extrabold text-[#0f1b2e] text-lg">
                         ₹{(item.price * item.quantity).toLocaleString()}
                       </span>
-                      <button 
-                        onClick={() => removeItem(item.id)}
-                        className="text-zinc-400 hover:text-red-500 transition-colors p-2"
-                        title="Remove item"
-                      >
+                      <button onClick={() => removeFromCart(item.id)} className="text-zinc-400 hover:text-red-500 transition-colors p-2" title="Remove item">
                         <Trash2 size={20} />
                       </button>
                     </div>
@@ -146,9 +104,9 @@ export default function CartPage() {
                 <span className="text-3xl font-extrabold text-[#c69c4e]">₹{total.toLocaleString()}</span>
               </div>
 
-              <button className="w-full bg-[#c69c4e] hover:bg-[#b0883d] text-white py-4 rounded-xl font-bold transition-all hover:shadow-lg hover:-translate-y-1 flex items-center justify-center gap-2 text-lg mb-6">
+              <Link href="/checkout" className="w-full bg-[#c69c4e] hover:bg-[#b0883d] text-white py-4 rounded-xl font-bold transition-all hover:shadow-lg hover:-translate-y-1 flex items-center justify-center gap-2 text-lg mb-6">
                 Proceed to Checkout <ArrowRight size={20} />
-              </button>
+              </Link>
 
               <div className="flex items-center justify-center gap-2 text-xs font-medium text-zinc-400">
                 <ShieldCheck size={16} className="text-green-400" />

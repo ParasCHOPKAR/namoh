@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Filter, ShoppingCart, Heart, Package, Loader2, Search, ChevronRight } from "lucide-react";
+import { useCart } from "@/context/CartContext"; // <-- WE IMPORT THE CART HERE
 
-// --- CATEGORY DATA (BRANDS REMOVED) ---
+// --- CATEGORY DATA ---
 const NAV_LINKS = [
   {
     name: "KITCHENWARE",
@@ -43,6 +45,44 @@ const NAV_LINKS = [
     ]
   },
   {
+    name: "BRANDS",
+    subItems: [
+      {
+        name: "Cambro",
+        children: [
+          "Cambox", "Display Covers", "Glass Racks", "Ice Caddy", "Ingredient Bin", 
+          "Insulated Transport", "Isothermal Container", "Pizza Dough Box", "Portable Bar", 
+          "Serving Products", "Waste Pedals"
+        ]
+      },
+      { name: "Coffee Grinder" },
+      { name: "Coffee Machines" },
+      { name: "Dipo Induction" },
+      { name: "Electrolux" },
+      { name: "Hamilton Beach" },
+      { name: "Hatco" },
+      { name: "Manitowoc" },
+      {
+        name: "Molecular Equipments",
+        children: [
+          "100% Chef", "Bamix", "Camerons", "Clifton Food Range", "Coravin", 
+          "Excalibur - Food Dehydrator", "Hotery", "ISI", "Polyscience Innovative Culinary Technology", 
+          "Sico Kitchenware", "Sousvide Tools", "Texturas", "Tou Foods"
+        ]
+      },
+      { name: "Piping Hot" },
+      { name: "Robot Coupe" },
+      { name: "Roller Grill" },
+      { name: "Santos" },
+      { name: "Sirman" },
+      {
+        name: "Trufrost & Butler",
+        children: ["Blenders", "Chest Freezer", "Confectionery", "Hot and Cold Dispensers", "Inductions"]
+      },
+      { name: "Winterhalter" }
+    ]
+  },
+  {
     name: "BARWARE",
     subItems: [
       { name: "PC Bar Glass" }, { name: "Bar Accessories" }, { name: "Peg Measurer" }, { name: "Cocktail Shaker" }, { name: "Bar Spoon" }, { name: "Bucket" }
@@ -50,20 +90,37 @@ const NAV_LINKS = [
   }
 ];
 
-export default function CatalogPage() {
+function CatalogContent() {
+  const searchParams = useSearchParams();
+  const { addToCart } = useCart(); // <-- WE GRAB THE ADD TO CART FUNCTION HERE
+  
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Filtering State
   const [activeCategory, setActiveCategory] = useState("ALL PRODUCTS");
   const [activeSubCategories, setActiveSubCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Price Slider State
   const [maxPrice, setMaxPrice] = useState<number>(100000);
   const [absoluteMaxPrice, setAbsoluteMaxPrice] = useState<number>(100000);
 
-  // 1. Fetch ALL products on page load
+  useEffect(() => {
+    const urlCategory = searchParams.get("category");
+    const urlSubCategory = searchParams.get("sub");
+
+    if (urlCategory) {
+      setActiveCategory(decodeURIComponent(urlCategory).toUpperCase());
+    } else {
+      setActiveCategory("ALL PRODUCTS");
+    }
+
+    if (urlSubCategory) {
+      setActiveSubCategories([decodeURIComponent(urlSubCategory)]);
+    } else {
+      setActiveSubCategories([]);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -73,10 +130,8 @@ export default function CatalogPage() {
         if (data.success) {
           setProducts(data.products);
           
-          // Calculate the highest price in the database for the slider
           if (data.products.length > 0) {
             const highest = Math.max(...data.products.map((p: any) => p.price || 0));
-            // Ensure slider goes at least to 1000 even if products are cheap
             const finalMax = highest > 1000 ? highest : 1000; 
             setAbsoluteMaxPrice(finalMax);
             setMaxPrice(finalMax);
@@ -92,10 +147,9 @@ export default function CatalogPage() {
     fetchProducts();
   }, []);
 
-  // 2. Handle Category Selection
   const handleCategoryChange = (cat: string) => {
     setActiveCategory(cat);
-    setActiveSubCategories([]); // Clear subcategories when switching main category
+    setActiveSubCategories([]); 
   };
 
   const toggleSubCategory = (sub: string) => {
@@ -104,7 +158,6 @@ export default function CatalogPage() {
     );
   };
 
-  // 3. Extract subcategories for the currently selected category
   const availableSubCategories = useMemo(() => {
     if (activeCategory === "ALL PRODUCTS") return [];
     const catData = NAV_LINKS.find(c => c.name === activeCategory);
@@ -113,16 +166,10 @@ export default function CatalogPage() {
     return catData.subItems.map(item => typeof item === 'object' && item !== null ? item.name : item as string);
   }, [activeCategory]);
 
-  // 4. Filter the products Robustly
   const filteredProducts = products.filter(product => {
-    // Check Category Match
     const matchesCategory = activeCategory === "ALL PRODUCTS" || (product.category && product.category.toUpperCase() === activeCategory);
-    
-    // Check SubCategory Match (Case Insensitive)
     const matchesSubCategory = activeSubCategories.length === 0 || 
       (product.subCategory && activeSubCategories.some(sub => sub.toLowerCase() === product.subCategory.toLowerCase()));
-    
-    // Check Search & Price
     const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPrice = (product.price || 0) <= maxPrice;
     
@@ -222,7 +269,6 @@ export default function CatalogPage() {
                 <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                   {availableSubCategories.map((sub) => (
                     <label key={sub} className="flex items-start gap-3 cursor-pointer group">
-                      {/* Custom Checkbox Input */}
                       <input 
                         type="checkbox" 
                         className="hidden"
@@ -250,14 +296,12 @@ export default function CatalogPage() {
         {/* RIGHT SIDE: PRODUCT GRID */}
         <div className="flex-1">
           
-          {/* Results Bar */}
           <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-zinc-200 mb-6">
             <p className="text-zinc-500 font-medium text-sm">
               Showing <span className="text-[#0f1b2e] font-bold text-base">{filteredProducts.length}</span> results
             </p>
           </div>
 
-          {/* DYNAMIC CONTENT */}
           {loading ? (
             <div className="w-full min-h-[400px] flex flex-col items-center justify-center text-zinc-400 bg-white rounded-2xl border border-zinc-200 shadow-sm">
               <Loader2 size={40} className="animate-spin mb-4 text-[#c69c4e]" />
@@ -281,7 +325,6 @@ export default function CatalogPage() {
                   key={product._id} 
                   className="bg-white rounded-2xl p-4 border border-zinc-200 shadow-sm hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] hover:border-[#c69c4e]/30 transition-all duration-300 group flex flex-col animate-in fade-in zoom-in-95"
                 >
-                  {/* Product Image */}
                   <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-zinc-50 mb-4 border border-zinc-100">
                     <Image 
                       src={product.image || "https://images.unsplash.com/photo-1584990347449-a6e386927909?q=80&w=600&auto=format&fit=crop"} 
@@ -291,14 +334,12 @@ export default function CatalogPage() {
                       className="object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
                     />
                     
-                    {/* Optional Badge */}
                     {product.badge && (
                       <div className="absolute top-3 left-3 bg-[#0f1b2e] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full z-10 shadow-sm">
                         {product.badge}
                       </div>
                     )}
 
-                    {/* Hover Actions */}
                     <div className="absolute bottom-3 right-3 flex flex-col gap-2 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10">
                       <button className="w-10 h-10 bg-white text-[#0f1b2e] rounded-full flex items-center justify-center shadow-lg hover:bg-[#c69c4e] hover:text-white transition-colors">
                         <Heart size={18} />
@@ -306,9 +347,7 @@ export default function CatalogPage() {
                     </div>
                   </div>
 
-                  {/* Product Details */}
                   <div className="flex flex-col flex-1">
-                    {/* Sub Category Tag */}
                     {product.subCategory && (
                       <p className="text-[10px] font-bold text-zinc-400 tracking-widest uppercase mb-1">{product.subCategory}</p>
                     )}
@@ -319,9 +358,15 @@ export default function CatalogPage() {
                     
                     <div className="mt-auto flex items-center justify-between pt-3 border-t border-zinc-100">
                       <span className="text-[18px] font-extrabold text-[#0f1b2e]">₹{(product.price || 0).toLocaleString()}</span>
-                      <button className="bg-zinc-100 hover:bg-[#0f1b2e] hover:text-white text-[#0f1b2e] w-10 h-10 rounded-xl flex items-center justify-center transition-colors">
+                      
+                      {/* --- THIS IS WHERE THE MAGIC HAPPENS --- */}
+                      <button 
+                        onClick={() => addToCart(product)} 
+                        className="bg-zinc-100 hover:bg-[#0f1b2e] hover:text-white text-[#0f1b2e] w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
+                      >
                         <ShoppingCart size={18} />
                       </button>
+
                     </div>
                   </div>
                 </div>
@@ -332,5 +377,20 @@ export default function CatalogPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function CatalogPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 size={48} className="animate-spin text-[#c69c4e]" />
+          <p className="text-[#0f1b2e] font-bold tracking-widest uppercase">Loading Catalog...</p>
+        </div>
+      </div>
+    }>
+      <CatalogContent />
+    </Suspense>
   );
 }

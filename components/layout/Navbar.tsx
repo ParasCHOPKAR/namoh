@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
+import { useCart } from "@/context/CartContext";
 import { 
   Search, Heart, ShoppingCart, User, Truck, 
   Download, Package, ChevronDown, Menu, LogOut, ChevronRight, Info, Phone, Shield
@@ -23,208 +24,134 @@ type SubItem = string | {
   children?: (string | { name: string; children: string[] })[];
 };
 
-  const NAV_LINKS: NavItem[] = [
-    { name: "HOME", path: "/", active: true },
+const NAV_LINKS: NavItem[] = [
+  { name: "HOME", path: "/", active: true },
 
-    // ================= KITCHENWARE =================
-    {
-      name: "KITCHENWARE",
-      path: "/category/kitchenware",
-      dropdown: true,
-      subItems: [
-        {
-          name: "SS GN PAN",
-          children: ["202 Grade"]
-        },
-        { name: "PC GN PAN" },
-        {
-          name: "Strainers",
-          children: [
-            "Small Tea Strainer",
-            "Small Conical Strainer",
-            "Red Handle Strainer",
-            "Spiral Strainer",
-            "Net Strainer",
-            "Conical Strainer"
-          ]
-        },
-        { name: "Chopping Board" },
-        { name: "Wok and Fry Pan" },
-        { name: "SS Kitchen Products" },
-        { name: "Pizza Tools" },
-        { name: "Knives, Cleavers & Scrappers" },
-        { name: "Electric Equipments" },
-        { name: "Laddle and Palta" },
-        { name: "Skimmer" },
-        { name: "Spares" }
-      ]
-    },
+  // ================= KITCHENWARE =================
+  {
+    name: "KITCHENWARE",
+    path: "/category", 
+    dropdown: true,
+    subItems: [
+      { name: "SS GN PAN", children: ["202 Grade"] },
+      { name: "PC GN PAN" },
+      {
+        name: "Strainers",
+        children: ["Small Tea Strainer", "Small Conical Strainer", "Red Handle Strainer", "Spiral Strainer", "Net Strainer", "Conical Strainer"]
+      },
+      { name: "Chopping Board" },
+      { name: "Wok and Fry Pan" },
+      { name: "SS Kitchen Products" },
+      { name: "Pizza Tools" },
+      { name: "Knives, Cleavers & Scrappers" },
+      { name: "Electric Equipments" },
+      { name: "Laddle and Palta" },
+      { name: "Skimmer" },
+      { name: "Spares" }
+    ]
+  },
 
-    // ================= GLASSWARE =================
-    {
-      name: "GLASSWARE",
-      path: "/category/glassware",
-      dropdown: true,
-      subItems: [
-        { name: "ARCOROC" },
-        { name: "AELIER" },
-        {
-          name: "ARIANE",
-          children: ["Prime", "Urmi"]
-        },
-        { name: "DINEWELL" },
-        { name: "DINEX ORGANIC" },
-        {
-          name: "OCEAN",
-          children: [
-            "Dine Bowl",
-            "Dine Ice Cream Bowl",
-            "Drink Shooter",
-            { name: "Drink Stemware", children: [] },
-            { name: "Tumbler", children: [] },
-            { name: "Beer Glass and Mug", children: [] }
-          ]
-        },
-        { name: "SANAAI" }
-      ]
-    },
+  // ================= GLASSWARE =================
+  {
+    name: "GLASSWARE",
+    path: "/category", 
+    dropdown: true,
+    subItems: [
+      { name: "ARCOROC" },
+      { name: "AELIER" },
+      { name: "ARIANE", children: ["Prime", "Urmi"] },
+      { name: "DINEWELL" },
+      { name: "DINEX ORGANIC" },
+      {
+        name: "OCEAN",
+        children: ["Dine Bowl", "Dine Ice Cream Bowl", "Drink Shooter", { name: "Drink Stemware", children: [] }, { name: "Tumbler", children: [] }, { name: "Beer Glass and Mug", children: [] }]
+      },
+      { name: "SANAAI" }
+    ]
+  },
 
-    // ================= HOTELWARE =================
-    {
-      name: "HOTELWARE",
-      path: "/category/hotelware",
-      dropdown: true,
-      subItems: [
-        { name: "Spoons and Forks" },
-        { name: "Serving Tray" },
-        { name: "Stainless Steel Serve Ware" },
-        {
-          name: "PC Products",
-          children: [
-            "Glasses",
-            "Cups and Bowls",
-            "Dome Cover",
-            "Salad Bowl",
-            "Storage Container",
-            "Compartment Tray",
-            "Compact Adjustable Dish",
-            "Utility Cart",
-            "GN Pan Trolley"
-          ]
-        },
-        {
-          name: "Melamine Table Products",
-          children: [
-            "Round",
-            "Square Round",
-            "Urmi",
-            "Matt Series",
-            "Single & Double Serving",
-            "Partition Plates",
-            "Cream Dot Series",
-            "Platter",
-            "Pickle Sets"
-          ]
-        },
-        { name: "Wooden Serving Products" },
-        { name: "Polyrattan Basket" },
-        { name: "Squeeze Bottle" },
-        { name: "Tongs" },
-        { name: "Table Top Products" },
-        { name: "Printer" }
-      ]
-    },
+  // ================= HOTELWARE =================
+  {
+    name: "HOTELWARE",
+    path: "/category", 
+    dropdown: true,
+    subItems: [
+      { name: "Spoons and Forks" },
+      { name: "Serving Tray" },
+      { name: "Stainless Steel Serve Ware" },
+      {
+        name: "PC Products",
+        children: ["Glasses", "Cups and Bowls", "Dome Cover", "Salad Bowl", "Storage Container", "Compartment Tray", "Compact Adjustable Dish", "Utility Cart", "GN Pan Trolley"]
+      },
+      {
+        name: "Melamine Table Products",
+        children: ["Round", "Square Round", "Urmi", "Matt Series", "Single & Double Serving", "Partition Plates", "Cream Dot Series", "Platter", "Pickle Sets"]
+      },
+      { name: "Wooden Serving Products" },
+      { name: "Polyrattan Basket" },
+      { name: "Squeeze Bottle" },
+      { name: "Tongs" },
+      { name: "Table Top Products" },
+      { name: "Printer" }
+    ]
+  },
 
-    // ================= BRANDS =================
-    {
-      name: "BRANDS",
-      path: "/category/brands",
-      dropdown: true,
-      subItems: [
-        {
-          name: "Cambro",
-          children: [
-            "Cambox",
-            "Display Covers",
-            "Glass Racks",
-            "Ice Caddy",
-            "Ingredient Bin",
-            "Insulated Transport",
-            "Isothermal Container",
-            "Pizza Dough Box",
-            "Portable Bar",
-            "Serving Products",
-            "Waste Pedals"
-          ]
-        },
-        { name: "Coffee Grinder" },
-        { name: "Coffee Machines" },
-        { name: "Dipo Induction" },
-        { name: "Electrolux" },
-        { name: "Hamilton Beach" },
-        { name: "Hatco" },
-        { name: "Manitowoc" },
-        {
-          name: "Molecular Equipments",
-          children: [
-            "100% Chef",
-            "Bamix",
-            "Camerons",
-            "Clifton Food Range",
-            "Coravin",
-            "Excalibur - Food Dehydrator",
-            "Hotery",
-            "ISI",
-            "Polyscience Innovative Culinary Technology",
-            "Sico Kitchenware",
-            "Sousvide Tools",
-            "Texturas",
-            "Tou Foods"
-          ]
-        },
-        { name: "Piping Hot" },
-        { name: "Robot Coupe" },
-        { name: "Roller Grill" },
-        { name: "Santos" },
-        { name: "Sirman" },
-        {
-          name: "Trufrost & Butler",
-          children: [
-            "Blenders",
-            "Chest Freezer",
-            "Confectionery",
-            "Hot and Cold Dispensers",
-            "Inductions"
-          ]
-        },
-        { name: "Winterhalter" }
-      ]
-    },
+  // ================= BRANDS =================
+  {
+    name: "BRANDS",
+    path: "/category", 
+    dropdown: true,
+    subItems: [
+      {
+        name: "Cambro",
+        children: ["Cambox", "Display Covers", "Glass Racks", "Ice Caddy", "Ingredient Bin", "Insulated Transport", "Isothermal Container", "Pizza Dough Box", "Portable Bar", "Serving Products", "Waste Pedals"]
+      },
+      { name: "Coffee Grinder" },
+      { name: "Coffee Machines" },
+      { name: "Dipo Induction" },
+      { name: "Electrolux" },
+      { name: "Hamilton Beach" },
+      { name: "Hatco" },
+      { name: "Manitowoc" },
+      {
+        name: "Molecular Equipments",
+        children: ["100% Chef", "Bamix", "Camerons", "Clifton Food Range", "Coravin", "Excalibur - Food Dehydrator", "Hotery", "ISI", "Polyscience Innovative Culinary Technology", "Sico Kitchenware", "Sousvide Tools", "Texturas", "Tou Foods"]
+      },
+      { name: "Piping Hot" },
+      { name: "Robot Coupe" },
+      { name: "Roller Grill" },
+      { name: "Santos" },
+      { name: "Sirman" },
+      {
+        name: "Trufrost & Butler",
+        children: ["Blenders", "Chest Freezer", "Confectionery", "Hot and Cold Dispensers", "Inductions"]
+      },
+      { name: "Winterhalter" }
+    ]
+  },
 
-    // ================= BARWARE =================
-    {
-      name: "BARWARE",
-      path: "/category/barware",
-      dropdown: true,
-      subItems: [
-        { name: "PC Bar Glass" },
-        { name: "Bar Accessories" },
-        { name: "Peg Measurer" },
-        { name: "Cocktail Shaker" },
-        { name: "Bar Spoon" },
-        { name: "Bucket" }
-      ]
-    },
+  // ================= BARWARE =================
+  {
+    name: "BARWARE",
+    path: "/category", 
+    dropdown: true,
+    subItems: [
+      { name: "PC Bar Glass" },
+      { name: "Bar Accessories" },
+      { name: "Peg Measurer" },
+      { name: "Cocktail Shaker" },
+      { name: "Bar Spoon" },
+      { name: "Bucket" }
+    ]
+  },
 
-    { name: "ABOUT US", path: "/about" },
-    { name: "CONTACT", path: "/contact" },
-  ];
-
-// Helper to generate URL safe slugs
-const createSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  { name: "ABOUT US", path: "/about" },
+  { name: "CONTACT", path: "/contact" },
+];
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const { cartCount } = useCart(); // Hook is now safely inside the component!
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   
@@ -253,7 +180,7 @@ export default function Navbar() {
           <Link href="/bulk" className="flex items-center gap-1.5 hover:text-[#c69c4e] transition-colors">
             <Package size={14} /> Bulk Orders
           </Link>
-          <Link href="/catalog" className="hidden sm:flex items-center gap-1.5 hover:text-[#c69c4e] transition-colors">
+          <Link href="/category" className="hidden sm:flex items-center gap-1.5 hover:text-[#c69c4e] transition-colors">
             <Download size={14} /> Download Catalog
           </Link>
           <Link href="/track" className="hidden sm:flex items-center gap-1.5 hover:text-[#c69c4e] transition-colors">
@@ -359,16 +286,21 @@ export default function Navbar() {
             </Link>
           )}
 
-          {/* Wishlist & Cart */}
+          {/* Wishlist */}
           <Link href="/wishlist" className="flex items-center gap-2 text-zinc-600 hover:text-[#0f1b2e] transition-colors">
             <Heart size={20} strokeWidth={1.5} />
             <span className="text-xs font-bold hidden xl:block">Wishlist</span>
           </Link>
           
+          {/* CART ICON WITH DYNAMIC COUNT */}
           <Link href="/cart" className="flex items-center gap-2 text-zinc-600 hover:text-[#0f1b2e] transition-colors relative">
             <ShoppingCart size={20} strokeWidth={1.5} />
             <span className="text-xs font-bold hidden xl:block">Cart</span>
-            <span className="absolute -top-1.5 -right-2 lg:right-5 bg-[#c69c4e] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full">0</span>
+            {cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-2 lg:right-5 bg-[#c69c4e] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full animate-in zoom-in">
+                {cartCount}
+              </span>
+            )}
           </Link>
         </div>
       </div>
@@ -395,7 +327,7 @@ export default function Navbar() {
                 {NAV_LINKS.filter(l => l.dropdown).map((link, idx) => (
                   <Link 
                     key={idx} 
-                    href={link.path || "#"}
+                    href={`/category?category=${encodeURIComponent(link.name)}`}
                     onClick={() => setIsCategoryMenuOpen(false)}
                     className="flex items-center justify-between px-5 py-3.5 text-sm font-semibold text-zinc-700 border-b border-zinc-100 hover:bg-zinc-50 hover:text-[#c69c4e] transition-colors group"
                   >
@@ -412,8 +344,9 @@ export default function Navbar() {
             {NAV_LINKS.map((link) => (
               <div key={link.name} className="relative group h-full flex items-center">
                 
+                {/* Main Level Path Generation */}
                 <Link 
-                  href={link.path || "#"} 
+                  href={link.dropdown ? `/category?category=${encodeURIComponent(link.name)}` : (link.path || "#")} 
                   className={`flex items-center gap-1.5 uppercase px-4 py-2 rounded-md transition-colors ${
                     link.active ? "text-[#c69c4e]" : "text-[#0f1b2e] hover:bg-zinc-100 hover:text-[#c69c4e]"
                   }`}
@@ -430,16 +363,15 @@ export default function Navbar() {
                     <div className="relative bg-white border border-zinc-200 shadow-xl rounded-xl min-w-[260px] py-2 before:absolute before:-top-2 before:left-6 before:w-4 before:h-4 before:bg-white before:rotate-45 before:border-l before:border-t before:border-zinc-200">
                       
                       {link.subItems.map((item, i) => {
-                        // Normalize the item (it could be a string or an object)
                         const isObject = typeof item === 'object' && item !== null;
                         const itemName = isObject ? (item as any).name : item;
                         const hasChildren = isObject && (item as any).children && (item as any).children.length > 0;
-                        const itemSlug = createSlug(itemName);
 
                         return (
                           <div key={i} className="relative group/sub">
+                            {/* 2nd Level Path Generation */}
                             <Link
-                              href={`${link.path}/${itemSlug}`}
+                              href={`/category?category=${encodeURIComponent(link.name)}&sub=${encodeURIComponent(itemName)}`}
                               className="flex items-center justify-between px-5 py-3 text-[13px] font-medium text-zinc-600 hover:bg-zinc-50 hover:text-[#c69c4e] transition-all whitespace-nowrap"
                             >
                               {itemName}
@@ -455,12 +387,12 @@ export default function Navbar() {
                                     const isChildObject = typeof child === 'object' && child !== null;
                                     const childName = isChildObject ? child.name : child;
                                     const hasGrandChildren = isChildObject && child.children && child.children.length > 0;
-                                    const childSlug = createSlug(childName);
 
                                     return (
                                       <div key={idx} className="relative group/third">
+                                        {/* 3rd Level Path Generation */}
                                         <Link
-                                          href={`${link.path}/${itemSlug}/${childSlug}`}
+                                          href={`/category?category=${encodeURIComponent(link.name)}&sub=${encodeURIComponent(childName)}`}
                                           className="flex items-center justify-between px-5 py-3 text-[13px] font-medium text-zinc-600 hover:bg-zinc-50 hover:text-[#c69c4e] transition-all whitespace-nowrap"
                                         >
                                           {childName}
@@ -474,7 +406,8 @@ export default function Navbar() {
                                               {child.children.map((third: string, t: number) => (
                                                 <Link
                                                   key={t}
-                                                  href={`${link.path}/${itemSlug}/${childSlug}/${createSlug(third)}`}
+                                                  // Deep 3rd level item link (e.g. 202 Grade inside Cambro)
+                                                  href={`/category?category=${encodeURIComponent(link.name)}&sub=${encodeURIComponent(third)}`} 
                                                   className="block px-5 py-3 text-[13px] font-medium text-zinc-600 hover:bg-zinc-50 hover:text-[#c69c4e] transition-all whitespace-nowrap"
                                                 >
                                                   {third}
