@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Filter, ShoppingCart, Heart, Package, Loader2, Search, ChevronRight } from "lucide-react";
-import { useCart } from "@/context/CartContext"; // <-- WE IMPORT THE CART HERE
+import { useCart } from "@/context/CartContext";
 
 // --- CATEGORY DATA ---
 const NAV_LINKS = [
@@ -92,7 +92,7 @@ const NAV_LINKS = [
 
 function CatalogContent() {
   const searchParams = useSearchParams();
-  const { addToCart } = useCart(); // <-- WE GRAB THE ADD TO CART FUNCTION HERE
+  const { addToCart } = useCart();
   
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -326,12 +326,20 @@ function CatalogContent() {
                   className="bg-white rounded-2xl p-4 border border-zinc-200 shadow-sm hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] hover:border-[#c69c4e]/30 transition-all duration-300 group flex flex-col animate-in fade-in zoom-in-95"
                 >
                   <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-zinc-50 mb-4 border border-zinc-100">
+                    {/* --- UPDATED NEXT.JS IMAGE WITH FALLBACK LOGIC --- */}
                     <Image 
-                      src={product.image || "https://images.unsplash.com/photo-1584990347449-a6e386927909?q=80&w=600&auto=format&fit=crop"} 
-                      alt={product.name}
+                      src={
+                        product.image && 
+                        (product.image.startsWith('http://') || product.image.startsWith('https://')) && 
+                        !product.image.includes('google.com/imgres')
+                          ? product.image 
+                          : "https://images.unsplash.com/photo-1584990347449-a6e386927909?q=80&w=600&auto=format&fit=crop"
+                      }
+                      alt={product.name || "Product"}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                       className="object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                      unoptimized={product.image?.includes('kommodo.ai') || product.image?.includes('5.imimg.com')} 
                     />
                     
                     {product.badge && (
@@ -359,7 +367,6 @@ function CatalogContent() {
                     <div className="mt-auto flex items-center justify-between pt-3 border-t border-zinc-100">
                       <span className="text-[18px] font-extrabold text-[#0f1b2e]">₹{(product.price || 0).toLocaleString()}</span>
                       
-                      {/* --- THIS IS WHERE THE MAGIC HAPPENS --- */}
                       <button 
                         onClick={() => addToCart(product)} 
                         className="bg-zinc-100 hover:bg-[#0f1b2e] hover:text-white text-[#0f1b2e] w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
