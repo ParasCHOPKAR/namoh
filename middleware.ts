@@ -20,12 +20,13 @@ export default withAuth(
   }
 );
 
-// Look closely at this matcher list. Checkout and Cart are GONE!
+// We are putting the "security guard" back on the checkout page!
 export const config = {
   matcher: [
     "/profile/:path*",
     "/orders/:path*",
     "/wishlist/:path*",
+    "/checkout/:path*", // <-- Add this line back!
     "/admin/:path*" 
   ],
 };
