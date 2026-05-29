@@ -1,25 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+import React, { useState } from "react";
+import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
-export default function CheckoutButton({ 
-  totalAmount, 
-  customerDetails 
-}: { 
-  totalAmount: number, 
-  customerDetails?: any 
-}) {
-  const { data: session } = useSession();
+export default function CheckoutButton({ totalAmount, customerDetails }: { totalAmount: number, customerDetails: any }) {
   const [loading, setLoading] = useState(false);
+  const { cart, clearCart } = useCart();
   const router = useRouter();
 
   const handlePayment = async () => {
     setLoading(true);
 
     try {
-      // 1. Get Order ID
+      // 1. Create Order on your backend
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,47 +22,65 @@ export default function CheckoutButton({
       });
       const data = await res.json();
 
-      if (!data.success) {
-        alert("Server error. Please try again.");
-        setLoading(false);
-        return;
-      }
+      if (!data.success) throw new Error("Could not create Razorpay order");
 
-      // 2. Configure Popup
+      // 2. Setup Razorpay Options
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
-        amount: data.order.amount, 
-        currency: data.order.currency,
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: data.order.amount,
+        currency: "INR",
         name: "Namoh Crockery Mart",
-        description: "Premium HORECA Supplies",
-        order_id: data.order.id, 
-        
-        // 3. Payment Success Handler
+        description: "Premium HORECA Solutions",
+        order_id: data.order.id,
         handler: async function (response: any) {
-          // In production, call your /api/checkout/verify endpoint here first!
-          
-          // Redirect to a success page
-          router.push(`/order-success?payment_id=${response.razorpay_payment_id}`);
+          // 3. THIS RUNS AFTER SUCCESSFUL PAYMENT - Send to Verify & Save Route
+          const verifyRes = await fetch("/api/order/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderData: {
+                customerDetails: customerDetails,
+                items: cart.map(item => ({
+                  productId: item.id,
+                  name: item.name,
+                  price: item.price,
+                  quantity: item.quantity,
+                  image: item.image,
+                  // We map brand to category here based on your cart setup, 
+                  // or ensure your CartContext stores the actual category.
+                  category: item.brand 
+                })),
+                pricing: {
+                  subTotal: totalAmount / 1.18, // Reverse calculating GST for example
+                  tax: totalAmount - (totalAmount / 1.18),
+                  shipping: totalAmount > 5000 ? 0 : 250,
+                  total: totalAmount
+                }
+              }
+            }),
+          });
+
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            clearCart();
+            router.push(`/order-success?payment_id=${response.razorpay_payment_id}`);
+          } else {
+            alert("Payment verified failed. Please contact support.");
+          }
         },
-        
-        prefill: {
-          // Added ? to prevent crashes if customerDetails is empty
-          name: customerDetails?.fullName || session?.user?.name || "Guest Customer",
-          email: session?.user?.email || "",
-          contact: customerDetails?.phone || ""
-        },
-        theme: {
-          color: "#0f1b2e", 
-        },
+        theme: { color: "#0f1b2e" },
       };
 
-      // 4. Open popup
-      const paymentObject = new (window as any).Razorpay(options);
-      paymentObject.open();
+      // @ts-ignore - Razorpay is loaded via script tag in layout.tsx
+      const rzp1 = new window.Razorpay(options);
+      rzp1.open();
 
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong opening the payment gateway.");
+      console.error("Payment failed", error);
+      alert("Payment initialization failed.");
     } finally {
       setLoading(false);
     }
@@ -77,9 +90,9 @@ export default function CheckoutButton({
     <button 
       onClick={handlePayment} 
       disabled={loading}
-      className="w-full bg-[#c69c4e] text-white font-extrabold py-5 rounded-xl hover:bg-[#b0883d] transition-all hover:-translate-y-1 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:hover:translate-y-0"
+      className="w-full bg-[#c69c4e] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#b0883d] transition-colors flex items-center justify-center gap-2"
     >
-      {loading ? "Connecting securely..." : `Pay ₹${(totalAmount || 0).toLocaleString()} Securely`}
+      {loading ? <Loader2 className="animate-spin" /> : "Pay Now"}
     </button>
   );
 }
