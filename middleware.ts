@@ -6,7 +6,6 @@ export default withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
-    // Example of Role-Based Access: Redirect non-admins away from /admin
     if (path.startsWith("/admin") && token?.role !== "admin") {
       return NextResponse.redirect(new URL("/", req.url));
     }
@@ -21,13 +20,13 @@ export default withAuth(
   }
 );
 
-// The 'matcher' array defines exactly which routes MUST require a login.
+// We are locking the checkout page so users MUST log in!
 export const config = {
   matcher: [
     "/profile/:path*",
     "/orders/:path*",
     "/wishlist/:path*",
+    "/checkout/:path*", // <-- Lock is ON!
     "/admin/:path*" 
-    // Notice: /checkout is completely REMOVED from this list!
   ],
 };
