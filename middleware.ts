@@ -1,7 +1,6 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
-// This is the default configuration for NextAuth middleware
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
@@ -14,11 +13,9 @@ export default withAuth(
   },
   {
     callbacks: {
-      // Returns true if authorized, false if they need to log in
       authorized: ({ token }) => !!token,
     },
     pages: {
-      // Tells NextAuth exactly where your custom login page is
       signIn: "/login",
     },
   }
@@ -30,7 +27,7 @@ export const config = {
     "/profile/:path*",
     "/orders/:path*",
     "/wishlist/:path*",
-    "/checkout/:path*", // <-- Checkout is protected!
     "/admin/:path*" 
+    // Notice: /checkout is completely REMOVED from this list!
   ],
 };
