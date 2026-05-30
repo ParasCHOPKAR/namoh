@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { PackagePlus, Upload, LayoutDashboard, Settings, LogOut, CheckCircle2 } from "lucide-react";
+import { PackagePlus, Upload, LayoutDashboard, Settings, LogOut, CheckCircle2, X } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { CldUploadWidget } from "next-cloudinary";
 
 // --- CATEGORY DATA (Extracted from your Navbar) ---
 const NAV_LINKS = [
@@ -66,10 +67,10 @@ export default function AdminDashboard() {
   
   // Form State
   const [formData, setFormData] = useState({
-    name: "", // The specific product name
+    name: "", 
     price: "",
-    category: "KITCHENWARE", // Default main category
-    subCategory: "", // This will be the dropdown/typeable field
+    category: "KITCHENWARE", 
+    subCategory: "", 
     image: "",
     description: "",
   });
@@ -79,7 +80,6 @@ export default function AdminDashboard() {
     const selectedCat = NAV_LINKS.find(cat => cat.name === formData.category);
     if (!selectedCat || !selectedCat.subItems) return [];
     
-    // Extract just the names of the sub-items for the datalist
     return selectedCat.subItems.map(item => {
       if (typeof item === 'object' && item !== null && 'name' in item) {
         return item.name;
@@ -91,7 +91,6 @@ export default function AdminDashboard() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    // If they change the main category, clear the sub-category so it doesn't hold an invalid selection
     if (name === "category") {
       setFormData({ ...formData, [name]: value, subCategory: "" });
     } else {
@@ -101,6 +100,13 @@ export default function AdminDashboard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent submission if image isn't uploaded
+    if (!formData.image) {
+      alert("Please upload a product image first!");
+      return;
+    }
+
     setLoading(true);
     setSuccessMsg("");
 
@@ -110,13 +116,12 @@ export default function AdminDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          price: Number(formData.price), // Convert price to number for database
+          price: Number(formData.price), 
         }),
       });
 
       if (res.ok) {
         setSuccessMsg("Product successfully added to catalog!");
-        // Reset form but keep the selected category for faster data entry
         setFormData({ 
           name: "", price: "", 
           category: formData.category, 
@@ -200,7 +205,7 @@ export default function AdminDashboard() {
                   </select>
                 </div>
 
-                {/* Sub-Category (Combobox / Datalist) */}
+                {/* Sub-Category */}
                 <div>
                   <label className="block text-sm font-bold text-[#0f1b2e] mb-2">Sub-Category Collection *</label>
                   <input 
@@ -213,7 +218,6 @@ export default function AdminDashboard() {
                     placeholder="Select from list or type custom name..." 
                     className="w-full px-5 py-3.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#c69c4e] transition-all font-bold text-[#0f1b2e]"
                   />
-                  {/* Dynamic HTML Datalist */}
                   <datalist id="subCategoryList">
                     {availableSubCategories.map((sub, idx) => (
                       <option key={idx} value={sub} />
@@ -237,13 +241,65 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Image URL */}
-              <div>
-                <label className="block text-sm font-bold text-[#0f1b2e] mb-2">Image URL *</label>
-                <div className="relative flex items-center">
-                  <div className="absolute left-4 text-zinc-400"><Upload size={18} /></div>
-                  <input required type="url" name="image" value={formData.image} onChange={handleChange} placeholder="https://example.com/image.jpg" className="w-full pl-12 pr-5 py-3.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#c69c4e] transition-all font-medium text-[#0f1b2e]" />
-                </div>
+              {/* PRODUCT IMAGE UPLOAD CLOUDINARY WIDGET */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-[#0f1b2e] block mb-2">Product Image *</label>
+                
+                {!formData.image ? (
+                  /* Upload Button shown when no image is uploaded yet */
+                  <CldUploadWidget 
+                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                    onSuccess={(result: any) => {
+                      if (result.info?.secure_url) {
+                        setFormData(prev => ({ ...prev, image: result.info.secure_url }));
+                      }
+                    }}
+                  >
+                    {({ open }) => (
+                      <button
+                        type="button"
+                        onClick={() => open()}
+                        className="w-full flex flex-col items-center justify-center gap-2 p-6 bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-xl hover:bg-zinc-100 hover:border-zinc-300 transition-all group"
+                      >
+                        <Upload className="h-6 w-6 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+                        <span className="text-sm font-medium text-zinc-600 group-hover:text-zinc-800">
+                          Click to upload Image from PC
+                        </span>
+                      </button>
+                    )}
+                  </CldUploadWidget>
+                ) : (
+                  /* Image Preview Layout shown after successful upload */
+                  <div className="relative border border-zinc-200 rounded-xl p-3 bg-zinc-50 flex items-center gap-4">
+                    <div className="relative h-16 w-16 rounded-lg overflow-hidden border border-zinc-200 bg-white shrink-0">
+                      <img 
+                        src={formData.image} 
+                        alt="Product preview" 
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-zinc-500 truncate">{formData.image}</p>
+                      <p className="text-xs text-green-600 font-bold mt-1">✓ Uploaded successfully</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, image: "" }))}
+                      className="p-2 hover:bg-red-50 text-zinc-400 hover:text-red-500 rounded-lg transition-colors"
+                      title="Remove image"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                )}
+                
+                {/* Hidden input to ensure the image URL submits with the rest of your form */}
+                <input 
+                  type="hidden" 
+                  name="image" 
+                  value={formData.image} 
+                  required 
+                />
               </div>
 
               {/* Description */}
