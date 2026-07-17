@@ -107,12 +107,12 @@ export default function AboutPage() {
       </section>
 
       {/* NEW: MISSION & VISION SECTION */}
-      <section className="py-24 bg-white border-y border-zinc-100">
+      <section className="py-24 bg-transparent relative z-10">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
             
             {/* Mission Card */}
-            <div className="group relative bg-zinc-50 rounded-[2.5rem] p-10 lg:p-14 overflow-hidden hover:shadow-2xl hover:shadow-[#0f1b2e]/5 transition-all duration-500">
+            <div className="group relative bg-white border border-zinc-200 shadow-xl shadow-zinc-200/50 rounded-[2.5rem] p-10 lg:p-14 overflow-hidden hover:shadow-2xl hover:shadow-[#0f1b2e]/5 transition-all duration-500">
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500 transform group-hover:scale-110">
                 <Target size={120} />
               </div>

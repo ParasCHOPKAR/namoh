@@ -12,9 +12,6 @@ import {
   MapPin,
   ArrowRight
 } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 
 // --- CUSTOM SVG SOCIAL ICONS ---
 const Facebook = () => (
@@ -56,45 +53,11 @@ const FooterLink = ({ href, text }: { href: string; text: string }) => (
   </li>
 );
 
-// Register GSAP Plugin
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const footerRef = useRef<HTMLElement>(null);
 
-  // 👇 FIX: Using useGSAP safely scopes the animation and prevents the loading/invisible bug
-  useGSAP(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: footerRef.current,
-        start: "top 85%",
-        toggleActions: "play none none reverse",
-      }
-    });
-
-    // 1. Trust Bar Items Reveal
-    tl.fromTo(".trust-indicator", 
-      { y: 30, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power2.out" }
-    )
-    // 2. Main Footer Columns Fade In
-    .fromTo(".footer-column", 
-      { y: 30, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power2.out" },
-      "-=0.2"
-    )
-    // 3. Bottom Copyright Line
-    .fromTo(".footer-bottom-bar",
-      { opacity: 0 },
-      { opacity: 1, duration: 0.6, ease: "power2.inOut" }
-    );
-  }, { scope: footerRef });
-
   return (
-    // 👇 FIX: Added 'relative z-50' so it never gets hidden under the page body
     <footer ref={footerRef} className="bg-[#0f1b2e] text-white w-full border-t-[4px] border-[#c69c4e] relative z-50">
       
       {/* --- TOP TIER: TRUST BAR --- */}
@@ -102,7 +65,7 @@ export default function Footer() {
         <div className="max-w-[1400px] mx-auto px-6 py-8 md:py-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4">
             
-            <div className="trust-indicator flex items-start gap-4 opacity-0">
+            <div className="trust-indicator flex items-start gap-4">
               <div className="text-[#c69c4e] mt-1 shrink-0"><LockKeyhole size={28} strokeWidth={1.5} /></div>
               <div>
                 <h4 className="font-bold text-sm uppercase tracking-wide mb-1">Secure Payment</h4>
@@ -110,7 +73,7 @@ export default function Footer() {
               </div>
             </div>
 
-            <div className="trust-indicator flex items-start gap-4 opacity-0">
+            <div className="trust-indicator flex items-start gap-4">
               <div className="text-[#c69c4e] mt-1 shrink-0"><RefreshCcw size={28} strokeWidth={1.5} /></div>
               <div>
                 <h4 className="font-bold text-sm uppercase tracking-wide mb-1">Easy Returns</h4>
@@ -118,7 +81,7 @@ export default function Footer() {
               </div>
             </div>
 
-            <div className="trust-indicator flex items-start gap-4 opacity-0">
+            <div className="trust-indicator flex items-start gap-4">
               <div className="text-[#c69c4e] mt-1 shrink-0"><Headset size={28} strokeWidth={1.5} /></div>
               <div>
                 <h4 className="font-bold text-sm uppercase tracking-wide mb-1">Customer Support</h4>
@@ -126,7 +89,7 @@ export default function Footer() {
               </div>
             </div>
 
-            <div className="trust-indicator flex items-start gap-4 opacity-0">
+            <div className="trust-indicator flex items-start gap-4">
               <div className="text-[#c69c4e] mt-1 shrink-0"><PackageCheck size={28} strokeWidth={1.5} /></div>
               <div>
                 <h4 className="font-bold text-sm uppercase tracking-wide mb-1">Safe Packaging</h4>
@@ -143,7 +106,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           
           {/* Column 1: About Us */}
-          <div className="footer-column lg:col-span-1 opacity-0">
+          <div className="footer-column lg:col-span-1">
             <h4 className="font-bold text-sm uppercase tracking-wider mb-6">About Us</h4>
             <p className="text-white/70 text-[13px] leading-relaxed mb-6">
               Your trusted partner for premium HORECA solutions. Quality products, reliable service, and professionalism you can count on.
@@ -166,7 +129,7 @@ export default function Footer() {
           </div>
 
           {/* Column 2: Quick Links */}
-          <div className="footer-column lg:col-span-1 lg:pl-8 opacity-0">
+          <div className="footer-column lg:col-span-1 lg:pl-8">
             <h4 className="font-bold text-sm uppercase tracking-wider mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <FooterLink href="/about" text="About Us" />
@@ -178,7 +141,7 @@ export default function Footer() {
           </div>
 
           {/* Column 3: Customer Service */}
-          <div className="footer-column lg:col-span-1 opacity-0">
+          <div className="footer-column lg:col-span-1">
             <h4 className="font-bold text-sm uppercase tracking-wider mb-6">Customer Service</h4>
             <ul className="space-y-3">
               <FooterLink href="/profile" text="My Account" />
@@ -190,7 +153,7 @@ export default function Footer() {
           </div>
 
           {/* Column 4: Contact Us */}
-          <div className="footer-column lg:col-span-1 opacity-0">
+          <div className="footer-column lg:col-span-1">
             <h4 className="font-bold text-sm uppercase tracking-wider mb-6">Contact Us</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-white/70 text-[13px] leading-relaxed">
@@ -209,7 +172,7 @@ export default function Footer() {
           </div>
 
           {/* Column 5: Newsletter */}
-          <div className="footer-column lg:col-span-1 opacity-0">
+          <div className="footer-column lg:col-span-1">
             <h4 className="font-bold text-sm uppercase tracking-wider mb-6">Newsletter</h4>
             <p className="text-white/70 text-[13px] mb-4 leading-relaxed">
               Subscribe to get updates on new arrivals, offers & more.
@@ -243,7 +206,7 @@ export default function Footer() {
       </div>
 
       {/* --- COPYRIGHT BAR --- */}
-      <div className="footer-bottom-bar bg-[#0a1220] py-4 opacity-0">
+      <div className="footer-bottom-bar bg-[#0a1220] py-4">
         <div className="max-w-[1400px] mx-auto px-6 flex flex-col items-center justify-center text-center gap-1.5">
           <p className="text-white/50 text-[11px] md:text-[12px] tracking-wide">
             &copy; {currentYear} Namoh Horeca Solutions. All Rights Reserved.
