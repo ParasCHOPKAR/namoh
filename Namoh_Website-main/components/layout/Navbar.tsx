@@ -1,0 +1,548 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter, usePathname, useSearchParams } from "next/navigation"; // 👈 ADDED FOR SEARCH ROUTING
+import { useSession, signOut } from "next-auth/react";
+import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import {
+  Search, Heart, ShoppingCart, User, Truck,
+  Download, Package, ChevronDown, Menu, LogOut, ChevronRight, Info, Phone, Shield
+} from "lucide-react";
+
+// --- EXPANDED NESTED NAVIGATION DATA ---
+type NavItem = {
+  name: string;
+  path?: string;
+  active?: boolean;
+  dropdown?: boolean;
+  subItems?: SubItem[];
+};
+
+type SubItem = string | {
+  name: string;
+  children?: (string | { name: string; children: string[] })[];
+};
+
+const NAV_LINKS: NavItem[] = [
+  { name: "HOME", path: "/", active: true },
+  {
+    name: "KITCHENWARE",
+    path: "/category",
+    dropdown: true,
+    subItems: [
+      { name: "SS GN PAN", children: ["202 Grade"] },
+      { name: "PC GN PAN" },
+      { name: "Strainers", children: ["Small Tea Strainer", "Small Conical Strainer", "Red Handle Strainer", "Spiral Strainer", "Net Strainer", "Conical Strainer"] },
+      { name: "Chopping Board" },
+      { name: "Wok and Fry Pan" },
+      { name: "SS Kitchen Products" },
+      { name: "Pizza Tools" },
+      { name: "Knives, Cleavers & Scrappers" },
+      { name: "Electric Equipments" },
+      { name: "Laddle and Palta" },
+      { name: "Skimmer" },
+      { name: "Spares" }
+    ]
+  },
+  {
+    name: "GLASSWARE",
+    path: "/category",
+    dropdown: true,
+    subItems: [
+      { name: "ARCOROC" }, { name: "AELIER" }, { name: "ARIANE", children: ["Prime", "Urmi"] },
+      { name: "DINEWELL" }, { name: "DINEX ORGANIC" },
+      { name: "OCEAN", children: ["Dine Bowl", "Dine Ice Cream Bowl", "Drink Shooter", { name: "Drink Stemware", children: [] }, { name: "Tumbler", children: [] }, { name: "Beer Glass and Mug", children: [] }] },
+      { name: "SANAAI" }
+    ]
+  },
+  {
+    name: "HOTELWARE",
+    path: "/category",
+    dropdown: true,
+    subItems: [
+      { name: "Spoons and Forks" }, { name: "Serving Tray" }, { name: "Stainless Steel Serve Ware" },
+      { name: "PC Products", children: ["Glasses", "Cups and Bowls", "Dome Cover", "Salad Bowl", "Storage Container", "Compartment Tray", "Compact Adjustable Dish", "Utility Cart", "GN Pan Trolley"] },
+      { name: "Melamine Table Products", children: ["Round", "Square Round", "Urmi", "Matt Series", "Single & Double Serving", "Partition Plates", "Cream Dot Series", "Platter", "Pickle Sets"] },
+      { name: "Wooden Serving Products" }, { name: "Polyrattan Basket" }, { name: "Squeeze Bottle" }, { name: "Tongs" }, { name: "Table Top Products" }, { name: "Printer" }
+    ]
+  },
+  {
+    name: "BRANDS",
+    path: "/category",
+    dropdown: true,
+    subItems: [
+      { name: "Cambro", children: ["Cambox", "Display Covers", "Glass Racks", "Ice Caddy", "Ingredient Bin", "Insulated Transport", "Isothermal Container", "Pizza Dough Box", "Portable Bar", "Serving Products", "Waste Pedals"] },
+      { name: "Coffee Grinder" }, { name: "Coffee Machines" }, { name: "Dipo Induction" }, { name: "Electrolux" }, { name: "Hamilton Beach" }, { name: "Hatco" }, { name: "Manitowoc" },
+      { name: "Molecular Equipments", children: ["100% Chef", "Bamix", "Camerons", "Clifton Food Range", "Coravin", "Excalibur - Food Dehydrator", "Hotery", "ISI", "Polyscience Innovative Culinary Technology", "Sico Kitchenware", "Sousvide Tools", "Texturas", "Tou Foods"] },
+      { name: "Piping Hot" }, { name: "Robot Coupe" }, { name: "Roller Grill" }, { name: "Santos" }, { name: "Sirman" },
+      { name: "Trufrost & Butler", children: ["Blenders", "Chest Freezer", "Confectionery", "Hot and Cold Dispensers", "Inductions"] },
+      { name: "Winterhalter" }
+    ]
+  },
+  {
+    name: "BARWARE",
+    path: "/category",
+    dropdown: true,
+    subItems: [
+      { name: "PC Bar Glass" }, { name: "Bar Accessories" }, { name: "Peg Measurer" }, { name: "Cocktail Shaker" }, { name: "Bar Spoon" }, { name: "Bucket" }
+    ]
+  },
+  { name: "ABOUT US", path: "/about" },
+  { name: "CONTACT", path: "/contact" },
+];
+
+export default function Navbar() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
+
+  const isLinkActive = (link: NavItem) => {
+    if (!pathname) return false;
+    if (link.name === "HOME") {
+      return pathname === "/";
+    }
+    if (link.name === "ABOUT US") {
+      return pathname === "/about";
+    }
+    if (link.name === "CONTACT") {
+      return pathname === "/contact";
+    }
+    if (link.path === "/category") {
+      const catParam = searchParams?.get("category");
+      if (catParam) {
+        return catParam.toUpperCase() === link.name.toUpperCase();
+      }
+      return false;
+    }
+    return false;
+  };
+
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+
+  // 👇 NEW SEARCH STATES
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+
+  const catMenuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null); // To detect clicks outside search bar
+
+  // 👇 FETCH PRODUCTS FOR SEARCH BAR IN BACKGROUND
+  useEffect(() => {
+    const fetchForSearch = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        if (data.success) {
+          setAllProducts(data.products);
+        }
+      } catch (error) {
+        console.error("Search fetch error:", error);
+      }
+    };
+    fetchForSearch();
+  }, []);
+
+  // 👇 FILTER PRODUCTS WHEN TYPING
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      const filtered = allProducts.filter(p =>
+        p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.subCategory && p.subCategory.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+      ).slice(0, 6); // Show top 6 results max to keep UI clean
+
+      setSuggestions(filtered);
+    } else {
+      setSuggestions([]);
+    }
+  }, [searchQuery, allProducts]);
+
+  // Click outside listener for dropdowns
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (catMenuRef.current && !catMenuRef.current.contains(event.target as Node)) {
+        setIsCategoryMenuOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("SEARCH BUTTON CLICKED");
+    const query = searchQuery.trim();
+    if (!query) return;
+
+    setIsSearchFocused(false);
+
+    // If query exactly matches a product name (case-insensitive), route directly to it
+    const exactMatch = Array.isArray(allProducts) ? allProducts.find(
+      (p) => p && p.name && typeof p.name === "string" && p.name.trim().toLowerCase() === query.toLowerCase()
+    ) : undefined;
+
+    if (exactMatch) {
+      router.push(`/product/${exactMatch._id}`);
+      setSearchQuery("");
+    } else {
+      router.push(`/category?search=${encodeURIComponent(query)}`);
+    }
+  };
+
+  return (
+    <header className="w-full flex flex-col z-50 bg-white shadow-sm relative">
+
+      {/* TIER 1: Top Bar */}
+      <div className="bg-[#0f1b2e] text-white/90 text-[11px] md:text-xs py-1.5 px-4 md:px-8 flex justify-between items-center font-medium tracking-wide">
+        <div className="hidden md:flex items-center gap-2">
+          <span className="text-[#c69c4e]">★</span>
+          Trusted by Professionals, Chosen for Excellence.
+        </div>
+        <div className="flex items-center gap-4 md:gap-6 ml-auto">
+          <Link href="/bulk" className={`flex items-center gap-1.5 hover:text-[#c69c4e] transition-colors ${pathname === "/bulk" ? "text-[#c69c4e]" : ""}`}>
+            <Package size={14} /> Bulk Orders
+          </Link>
+          <Link href="/category" className="hidden sm:flex items-center gap-1.5 hover:text-[#c69c4e] transition-colors">
+            <Download size={14} /> Download Catalog
+          </Link>
+          <Link href="/orders" className="hidden sm:flex items-center gap-1.5 hover:text-[#c69c4e] transition-colors">
+            <Truck size={14} /> Track Order
+          </Link>
+        </div>
+      </div>
+
+      {/* TIER 2: Main Search & Logo Bar */}
+      <div className="max-w-[1600px] w-full mx-auto px-4 md:px-8 py-2.5 lg:py-3 flex flex-wrap lg:flex-nowrap items-center justify-between gap-6 relative">
+
+        <Link href="/" className="shrink-0 flex items-center justify-center mr-2 lg:mr-6 lg:w-[240px]">
+          <div className="relative w-[100px] h-[50px] md:w-[130px] md:h-[65px] flex items-center justify-center">
+            <Image
+              src="/logo/logo-02.jpeg"
+              alt="Logo"
+              fill
+              sizes="(max-width: 768px) 100px, 130px"
+              className="object-contain object-center"
+              priority
+            />
+          </div>
+        </Link>
+
+        {/* 👇 UPDATED HUGE SEARCH BAR WITH AUTO-SUGGEST DROPDOWN */}
+        <div className="hidden lg:flex flex-1 max-w-4xl mx-2 relative" ref={searchRef}>
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex w-full border border-zinc-300 rounded-full overflow-hidden focus-within:border-[#c69c4e] focus-within:ring-1 focus-within:ring-[#c69c4e] transition-all h-10 bg-white"
+          >
+            <input
+              type="text"
+              placeholder="Search for products, brands, or categories..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              className="flex-1 px-6 text-sm focus:outline-none text-zinc-800 h-full bg-transparent"
+            />
+
+            <button
+              type="submit"
+              className="bg-[#c69c4e] hover:bg-[#b0883d] transition-colors text-white px-8 flex items-center justify-center h-full"
+            >
+              <Search size={18} />
+            </button>
+          </form>
+
+          {/* SEARCH SUGGESTIONS DROPDOWN */}
+          {isSearchFocused && searchQuery.trim().length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-zinc-200 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] rounded-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
+              {suggestions.length > 0 ? (
+                <div className="flex flex-col">
+                  {suggestions.map((product) => (
+                    <Link
+                      key={product._id}
+                      href={`/product/${product._id}`}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        router.push(`/product/${product._id}`);
+                        setIsSearchFocused(false);
+                        setSearchQuery("");
+                      }}
+                      className="flex items-center gap-4 px-4 py-3 hover:bg-zinc-50 border-b border-zinc-100 last:border-0 transition-colors group cursor-pointer"
+                    >
+                      <div className="relative w-12 h-12 bg-zinc-100 rounded-lg overflow-hidden shrink-0 border border-zinc-200">
+                        <Image
+                          src={
+                            product.image &&
+                              (product.image.startsWith('http://') || product.image.startsWith('https://')) &&
+                              !product.image.includes('google.com/imgres')
+                              ? product.image
+                              : "https://images.unsplash.com/photo-1584990347449-a6e386927909?q=80&w=600&auto=format&fit=crop"
+                          }
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-[#0f1b2e] truncate">{product.name}</p>
+                        {product.subCategory && (
+                          <p className="text-[10px] font-bold text-[#c69c4e] uppercase tracking-wider mt-0.5">{product.subCategory}</p>
+                        )}
+                      </div>
+                      <div className="text-sm font-extrabold text-[#0f1b2e] shrink-0">
+                        ₹{(product.price || 0).toLocaleString()}
+                      </div>
+                    </Link>
+                  ))}
+                  <div className="p-2 bg-zinc-50 text-center border-t border-zinc-100">
+                    <p className="text-xs text-zinc-500 font-medium tracking-wide">Press Enter to view all results</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-8 text-center flex flex-col items-center justify-center">
+                  <Search size={32} className="text-zinc-200 mb-3" />
+                  <p className="text-sm font-bold text-[#0f1b2e]">No products found</p>
+                  <p className="text-xs text-zinc-500 mt-1">We couldn't find anything matching "{searchQuery}"</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Right Icons */}
+        <div className="flex items-center gap-5 xl:gap-6 shrink-0 ml-auto lg:ml-0">
+
+          {/* DYNAMIC USER MENU */}
+          {session ? (
+            <div className="relative">
+              {isProfileOpen && (
+                <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
+              )}
+
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center gap-2 text-zinc-600 hover:text-[#0f1b2e] transition-colors relative z-50"
+              >
+                <div className="bg-[#0f1b2e] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
+                  {session.user?.email?.charAt(0).toUpperCase() || "U"}
+                </div>
+                <span className="text-xs font-bold hidden xl:block">Account</span>
+                <ChevronDown size={14} className={`hidden xl:block transition-transform ${isProfileOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {isProfileOpen && (
+                <div className="absolute right-0 top-full mt-3 w-64 bg-white border border-zinc-100 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
+
+                  {/* Header */}
+                  <div className="px-4 py-3 bg-zinc-50 border-b border-zinc-100">
+                    <p className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold mb-0.5">Signed in as</p>
+                    <p className="text-sm font-bold text-[#0f1b2e] truncate">{session.user?.email}</p>
+                    {/* Admin Badge */}
+                    {(session.user as any)?.role === "admin" && (
+                      <span className="inline-block mt-1 px-2 py-0.5 bg-[#c69c4e]/10 text-[#c69c4e] text-[10px] font-bold rounded uppercase tracking-wider">
+                        Administrator
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Standard User Links */}
+                  <div className="p-2 flex flex-col gap-1">
+                    <Link href="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-zinc-600 hover:text-[#c69c4e] hover:bg-zinc-50 rounded-xl transition-colors">
+                      <User size={16} /> My Profile
+                    </Link>
+                    <Link href="/orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-zinc-600 hover:text-[#c69c4e] hover:bg-zinc-50 rounded-xl transition-colors">
+                      <Package size={16} /> My Orders
+                    </Link>
+                  </div>
+
+                  {/* ADMIN ONLY LINK */}
+                  {(session.user as any)?.role === "admin" && (
+                    <div className="p-2 border-t border-zinc-100">
+                      <Link href="/admin/dashboard" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-[#0f1b2e] bg-zinc-50 hover:bg-zinc-100 rounded-xl transition-colors">
+                        <Shield size={16} className="text-[#c69c4e]" /> Admin Dashboard
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* Sign Out */}
+                  <div className="p-2 border-t border-zinc-100">
+                    <button onClick={() => { signOut(); setIsProfileOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 rounded-xl transition-colors">
+                      <LogOut size={16} /> Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link href="/login" className="flex items-center gap-2 text-zinc-600 hover:text-[#0f1b2e] transition-colors">
+              <User size={20} strokeWidth={1.5} />
+              <span className="text-xs font-bold hidden xl:block">Login</span>
+            </Link>
+          )}
+
+          {/* WISHLIST ICON WITH DYNAMIC COUNT */}
+          <Link href="/wishlist" className="flex items-center gap-2 text-zinc-600 hover:text-[#0f1b2e] transition-colors relative">
+            <Heart size={20} strokeWidth={1.5} />
+            <span className="text-xs font-bold hidden xl:block">Wishlist</span>
+            {wishlistCount > 0 && (
+              <span className="absolute -top-1.5 -right-2 lg:right-11 bg-red-500 text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full animate-in zoom-in shadow-sm">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
+
+          {/* CART ICON WITH DYNAMIC COUNT */}
+          <Link href="/cart" className="flex items-center gap-2 text-zinc-600 hover:text-[#0f1b2e] transition-colors relative">
+            <ShoppingCart size={20} strokeWidth={1.5} />
+            <span className="text-xs font-bold hidden xl:block">Cart</span>
+            {cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-2 lg:right-5 bg-[#c69c4e] text-white text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full animate-in zoom-in shadow-sm">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+        </div>
+      </div>
+
+      {/* TIER 3: Category Links Bar */}
+      <div className="border-t border-zinc-200 bg-white hidden lg:block relative z-40">
+        <div className="max-w-[1600px] mx-auto px-8 flex items-center h-[46px]">
+
+          {/* ALL CATEGORIES TOGGLE */}
+          <div className="relative h-full flex items-end" ref={catMenuRef}>
+            <button
+              onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+              className={`flex items-center justify-between px-6 py-3 font-bold text-sm w-[240px] rounded-t-lg transition-colors h-full ${isCategoryMenuOpen ? "bg-[#c69c4e] text-white" : "bg-[#0f1b2e] text-white hover:bg-[#1a2b47]"
+                }`}
+            >
+              <div className="flex items-center gap-3"><Menu size={18} /> ALL CATEGORIES</div>
+              <ChevronDown size={16} className={`transition-transform duration-300 ${isCategoryMenuOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {/* ATTRACTIVE LEFT DROPDOWN MENU */}
+            {isCategoryMenuOpen && (
+              <div className="absolute top-full left-0 w-[240px] bg-white border border-zinc-200 shadow-xl rounded-b-lg overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in duration-200">
+                {NAV_LINKS.filter(l => l.dropdown).map((link, idx) => (
+                  <Link
+                    key={idx}
+                    href={`/category?category=${encodeURIComponent(link.name)}`}
+                    onClick={() => setIsCategoryMenuOpen(false)}
+                    className="flex items-center justify-between px-5 py-3.5 text-sm font-semibold text-zinc-700 border-b border-zinc-100 hover:bg-zinc-50 hover:text-[#c69c4e] transition-colors group"
+                  >
+                    {link.name}
+                    <ChevronRight size={14} className="text-zinc-400 group-hover:text-[#c69c4e] group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* MAIN HORIZONTAL NAVIGATION WITH MULTI-LEVEL HOVER */}
+          <nav className="flex items-center gap-1 xl:gap-2 ml-6 text-[13px] font-bold h-full">
+            {NAV_LINKS.map((link) => (
+              <div key={link.name} className="relative group h-full flex items-center">
+
+                {/* Main Level Path Generation */}
+                <Link
+                  href={link.dropdown ? `/category?category=${encodeURIComponent(link.name)}` : (link.path || "#")}
+                  className={`flex items-center gap-1.5 uppercase px-4 py-2 rounded-md transition-colors ${isLinkActive(link) ? "text-[#c69c4e]" : "text-[#0f1b2e] hover:bg-zinc-100 hover:text-[#c69c4e]"
+                    }`}
+                >
+                  {link.name === "ABOUT US" && <Info size={14} />}
+                  {link.name === "CONTACT" && <Phone size={14} />}
+                  {link.name}
+                  {link.dropdown && <ChevronDown size={14} className="opacity-50 group-hover:rotate-180 transition-transform duration-300" />}
+                </Link>
+
+                {/* MULTI LEVEL DROPDOWN */}
+                {link.dropdown && link.subItems && (
+                  <div className="absolute top-full left-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pt-2">
+                    <div className="relative bg-white border border-zinc-200 shadow-xl rounded-xl min-w-[260px] py-2 before:absolute before:-top-2 before:left-6 before:w-4 before:h-4 before:bg-white before:rotate-45 before:border-l before:border-t before:border-zinc-200">
+
+                      {link.subItems.map((item, i) => {
+                        const isObject = typeof item === 'object' && item !== null;
+                        const itemName = isObject ? (item as any).name : item;
+                        const hasChildren = isObject && (item as any).children && (item as any).children.length > 0;
+
+                        return (
+                          <div key={i} className="relative group/sub">
+                            {/* 2nd Level Path Generation */}
+                            <Link
+                              href={`/category?category=${encodeURIComponent(link.name)}&sub=${encodeURIComponent(itemName)}`}
+                              className="flex items-center justify-between px-5 py-3 text-[13px] font-medium text-zinc-600 hover:bg-zinc-50 hover:text-[#c69c4e] transition-all whitespace-nowrap"
+                            >
+                              {itemName}
+                              {hasChildren && <ChevronRight size={14} />}
+                            </Link>
+
+                            {/* SUB DROPDOWN (2nd Level) */}
+                            {hasChildren && (
+                              <div className="absolute left-full top-0 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-300 z-50 pl-1">
+                                <div className="bg-white border border-zinc-200 shadow-xl rounded-xl min-w-[220px] py-2">
+
+                                  {(item as any).children.map((child: any, idx: number) => {
+                                    const isChildObject = typeof child === 'object' && child !== null;
+                                    const childName = isChildObject ? child.name : child;
+                                    const hasGrandChildren = isChildObject && child.children && child.children.length > 0;
+
+                                    return (
+                                      <div key={idx} className="relative group/third">
+                                        {/* 3rd Level Path Generation */}
+                                        <Link
+                                          href={`/category?category=${encodeURIComponent(link.name)}&sub=${encodeURIComponent(childName)}`}
+                                          className="flex items-center justify-between px-5 py-3 text-[13px] font-medium text-zinc-600 hover:bg-zinc-50 hover:text-[#c69c4e] transition-all whitespace-nowrap"
+                                        >
+                                          {childName}
+                                          {hasGrandChildren && <ChevronRight size={14} />}
+                                        </Link>
+
+                                        {/* THIRD LEVEL DROPDOWN */}
+                                        {hasGrandChildren && (
+                                          <div className="absolute left-full top-0 opacity-0 invisible group-hover/third:opacity-100 group-hover/third:visible transition-all duration-300 z-50 pl-1">
+                                            <div className="bg-white border border-zinc-200 shadow-xl rounded-xl min-w-[200px] py-2">
+                                              {child.children.map((third: string, t: number) => (
+                                                <Link
+                                                  key={t}
+                                                  // Deep 3rd level item link
+                                                  href={`/category?category=${encodeURIComponent(link.name)}&sub=${encodeURIComponent(third)}`}
+                                                  className="block px-5 py-3 text-[13px] font-medium text-zinc-600 hover:bg-zinc-50 hover:text-[#c69c4e] transition-all whitespace-nowrap"
+                                                >
+                                                  {third}
+                                                </Link>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
+        </div>
+      </div>
+    </header>
+  );
+}
