@@ -10,95 +10,12 @@ import { useWishlist } from "@/context/WishlistContext";
 
 // --- CATEGORY DATA ---
 const NAV_LINKS = [
-  {
-    name: "KITCHENWARE",
-    subItems: [
-      { name: "SS GN PAN", children: ["202 Grade"] },
-      { name: "PC GN PAN" },
-      { name: "Strainers", children: ["Small Tea Strainer", "Small Conical Strainer", "Red Handle Strainer", "Spiral Strainer", "Net Strainer", "Conical Strainer"] },
-      { name: "Chopping Board" },
-      { name: "Wok and Fry Pan" },
-      { name: "SS Kitchen Products" },
-      { name: "Pizza Tools" },
-      { name: "Knives, Cleavers & Scrappers" },
-      { name: "Electric Equipments" },
-      { name: "Laddle and Palta" },
-      { name: "Skimmer" },
-      { name: "Spares" }
-    ]
-  },
-  {
-    name: "GLASSWARE",
-    subItems: [
-      { name: "ARCOROC" }, { name: "AELIER" }, { name: "ARIANE", children: ["Prime", "Urmi"] },
-      { name: "DINEWELL" }, { name: "DINEX ORGANIC" },
-      { name: "OCEAN", children: ["Dine Bowl", "Dine Ice Cream Bowl", "Drink Shooter", { name: "Drink Stemware", children: [] }, { name: "Tumbler", children: [] }, { name: "Beer Glass and Mug", children: [] }] },
-      { name: "SANAAI" }
-    ]
-  },
-  {
-    name: "HOTELWARE",
-    subItems: [
-      { name: "Spoons and Forks" }, { name: "Serving Tray" }, { name: "Stainless Steel Serve Ware" },
-      { name: "PC Products", children: ["Glasses", "Cups and Bowls", "Dome Cover", "Salad Bowl", "Storage Container", "Compartment Tray", "Compact Adjustable Dish", "Utility Cart", "GN Pan Trolley"] },
-      { name: "Melamine Table Products", children: ["Round", "Square Round", "Urmi", "Matt Series", "Single & Double Serving", "Partition Plates", "Cream Dot Series", "Platter", "Pickle Sets"] },
-      { name: "Wooden Serving Products" }, { name: "Polyrattan Basket" }, { name: "Squeeze Bottle" }, { name: "Tongs" }, { name: "Table Top Products" }, { name: "Printer" }
-    ]
-  },
-  {
-    name: "BRANDS",
-    subItems: [
-      { name: "Cambro", children: ["Cambox", "Display Covers", "Glass Racks", "Ice Caddy", "Ingredient Bin", "Insulated Transport", "Isothermal Container", "Pizza Dough Box", "Portable Bar", "Serving Products", "Waste Pedals"] },
-      { name: "Coffee Grinder" }, { name: "Coffee Machines" }, { name: "Dipo Induction" }, { name: "Electrolux" }, { name: "Hamilton Beach" }, { name: "Hatco" }, { name: "Manitowoc" },
-      { name: "Molecular Equipments", children: ["100% Chef", "Bamix", "Camerons", "Clifton Food Range", "Coravin", "Excalibur - Food Dehydrator", "Hotery", "ISI", "Polyscience Innovative Culinary Technology", "Sico Kitchenware", "Sousvide Tools", "Texturas", "Tou Foods"] },
-      { name: "Piping Hot" }, { name: "Robot Coupe" }, { name: "Roller Grill" }, { name: "Santos" }, { name: "Sirman" },
-      { name: "Trufrost & Butler", children: ["Blenders", "Chest Freezer", "Confectionery", "Hot and Cold Dispensers", "Inductions"] },
-      { name: "Winterhalter" }
-    ]
-  },
-  {
-    name: "BARWARE",
-    subItems: [
-      { name: "PC Bar Glass" }, { name: "Bar Accessories" }, { name: "Peg Measurer" }, { name: "Cocktail Shaker" }, { name: "Bar Spoon" }, { name: "Bucket" }
-    ]
-  }
+  { name: "KITCHENWARE" },
+  { name: "GLASSWARE" },
+  { name: "HOTELWARE" },
+  { name: "BRANDS" },
+  { name: "BARWARE" }
 ];
-
-// Helper to get all child categories recursively
-function getAllChildSubcategories(categoryName: string, subName: string): string[] {
-  const result: string[] = [subName];
-  const cat = NAV_LINKS.find(c => c.name.toUpperCase() === categoryName.toUpperCase());
-  if (!cat || !cat.subItems) return result;
-
-  const findChildren = (items: any[]) => {
-    for (const item of items) {
-      const isObject = typeof item === 'object' && item !== null;
-      const itemName = isObject ? (item as any).name : item;
-      
-      if (itemName.toLowerCase() === subName.toLowerCase()) {
-        if (isObject && (item as any).children) {
-          (item as any).children.forEach((child: any) => {
-            const childName = typeof child === 'object' ? child.name : child;
-            result.push(childName);
-            if (typeof child === 'object' && child.children) {
-              child.children.forEach((grandChild: any) => {
-                result.push(typeof grandChild === 'object' ? grandChild.name : grandChild);
-              });
-            }
-          });
-        }
-        return true;
-      }
-      
-      if (isObject && (item as any).children) {
-         findChildren((item as any).children);
-      }
-    }
-  };
-  
-  findChildren(cat.subItems);
-  return result;
-}
 
 function CatalogContent() {
   const searchParams = useSearchParams();
@@ -200,15 +117,10 @@ function CatalogContent() {
   const filteredProducts = products.filter(product => {
     const matchesCategory = activeCategory === "ALL PRODUCTS" || (product.category && product.category.toUpperCase() === activeCategory);
     
-    let matchesSubCategory = true;
-    if (activeSubCategories.length > 0) {
-      matchesSubCategory = activeSubCategories.some(activeSub => {
-        const allAllowedSubs = getAllChildSubcategories(activeCategory, activeSub);
-        return product.subCategory && allAllowedSubs.some(allowedSub => 
-          allowedSub.toLowerCase() === product.subCategory.trim().toLowerCase()
-        );
-      });
-    }
+    const matchesSubCategory = activeSubCategories.length === 0 || 
+      (product.subCategory && activeSubCategories.some(sub => 
+        sub.trim().toLowerCase() === product.subCategory.trim().toLowerCase()
+      ));
       
     const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPrice = (product.price || 0) <= maxPrice;
@@ -268,7 +180,7 @@ function CatalogContent() {
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 mt-8 flex flex-col lg:flex-row gap-8">
         
         {/* LEFT SIDEBAR: FILTERS */}
-        <aside className="w-full lg:w-[280px] shrink-0 sticky top-24 h-fit max-h-[85vh] overflow-y-auto custom-scrollbar pb-4 z-20">
+        <aside className="w-full lg:w-[280px] shrink-0 relative lg:sticky lg:top-24 h-fit lg:max-h-[85vh] overflow-y-auto custom-scrollbar pb-4 z-20">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-200">
             <div className="flex items-center justify-between font-extrabold text-[#0f1b2e] text-lg mb-6 pb-4 border-b border-zinc-100">
               <div className="flex items-center gap-2"><Filter size={20} className="text-[#c69c4e]" /> Filters</div>

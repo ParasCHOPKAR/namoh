@@ -9,7 +9,7 @@ export default function HeroSection() {
     <section className="relative w-full flex flex-col bg-zinc-50">
       
       {/* --- HERO VIDEO (CLEAN) --- */}
-      <div className="relative w-full h-[70vh] min-h-[550px] overflow-hidden bg-zinc-900">
+      <div className="relative w-full h-[50vh] min-h-[400px] md:h-[70vh] md:min-h-[550px] overflow-hidden bg-zinc-900">
         
         {/* Background Video */}
         <video 

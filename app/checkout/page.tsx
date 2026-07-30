@@ -225,7 +225,7 @@ export default function CheckoutPage() {
 
         {/* RIGHT COLUMN: Order Summary */}
         <aside className="w-full lg:w-[400px] shrink-0">
-          <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-sm border border-zinc-200 sticky top-24">
+          <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-sm border border-zinc-200 relative lg:sticky lg:top-24">
             <h3 className="font-extrabold text-[#0f1b2e] text-lg mb-6 pb-4 border-b border-zinc-100">Order Summary</h3>
             
             <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
