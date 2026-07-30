@@ -79,7 +79,7 @@ export default function CartPage() {
 
           {/* RIGHT: ORDER SUMMARY */}
           <div className="lg:w-1/3">
-            <div className="bg-[#0f1b2e] text-white rounded-[2rem] p-8 lg:p-10 sticky top-24 shadow-2xl shadow-[#0f1b2e]/20">
+            <div className="bg-[#0f1b2e] text-white rounded-[2rem] p-8 lg:p-10 relative lg:sticky lg:top-24 shadow-2xl shadow-[#0f1b2e]/20">
               <h2 className="text-2xl font-bold mb-8 tracking-tight border-b border-white/10 pb-6">Order Summary</h2>
               
               <div className="space-y-4 text-sm font-medium text-zinc-300 mb-8">

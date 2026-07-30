@@ -180,7 +180,7 @@ function CatalogContent() {
       <div className="max-w-[1600px] mx-auto px-4 md:px-8 mt-8 flex flex-col lg:flex-row gap-8">
         
         {/* LEFT SIDEBAR: FILTERS */}
-        <aside className="w-full lg:w-[280px] shrink-0 sticky top-24 h-fit max-h-[85vh] overflow-y-auto custom-scrollbar pb-4 z-20">
+        <aside className="w-full lg:w-[280px] shrink-0 relative lg:sticky lg:top-24 h-fit lg:max-h-[85vh] overflow-y-auto custom-scrollbar pb-4 z-20">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-zinc-200">
             <div className="flex items-center justify-between font-extrabold text-[#0f1b2e] text-lg mb-6 pb-4 border-b border-zinc-100">
               <div className="flex items-center gap-2"><Filter size={20} className="text-[#c69c4e]" /> Filters</div>

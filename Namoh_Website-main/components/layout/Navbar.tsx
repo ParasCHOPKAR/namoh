@@ -9,7 +9,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import {
   Search, Heart, ShoppingCart, User, Truck,
-  Download, Package, ChevronDown, Menu, LogOut, ChevronRight, Info, Phone, Shield
+  Download, Package, ChevronDown, Menu, LogOut, ChevronRight, Info, Phone, Shield, X
 } from "lucide-react";
 
 // --- EXPANDED NESTED NAVIGATION DATA ---
@@ -126,6 +126,15 @@ export default function Navbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
 
+  // Mobile Menu State
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [expandedMobileCats, setExpandedMobileCats] = useState<string[]>([]);
+  const toggleMobileCat = (name: string) => {
+    setExpandedMobileCats(prev => 
+      prev.includes(name) ? prev.filter(c => c !== name) : [...prev, name]
+    );
+  };
+
   // 👇 NEW SEARCH STATES
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -226,18 +235,28 @@ export default function Navbar() {
       {/* TIER 2: Main Search & Logo Bar */}
       <div className="max-w-[1600px] w-full mx-auto px-4 md:px-8 py-2.5 lg:py-3 flex flex-wrap lg:flex-nowrap items-center justify-between gap-6 relative">
 
-        <Link href="/" className="shrink-0 flex items-center justify-center mr-2 lg:mr-6 lg:w-[240px]">
-          <div className="relative w-[100px] h-[50px] md:w-[130px] md:h-[65px] flex items-center justify-center">
-            <Image
-              src="/logo/logo-02.jpeg"
-              alt="Logo"
-              fill
-              sizes="(max-width: 768px) 100px, 130px"
-              className="object-contain object-center"
-              priority
-            />
-          </div>
-        </Link>
+        <div className="flex items-center">
+          {/* MOBILE MENU BUTTON */}
+          <button 
+            className="lg:hidden mr-4 p-1 text-zinc-800 hover:text-[#c69c4e] transition-colors"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
+            <Menu size={24} />
+          </button>
+
+          <Link href="/" className="shrink-0 flex items-center justify-center mr-2 lg:mr-6 lg:w-[240px]">
+            <div className="relative w-[100px] h-[50px] md:w-[130px] md:h-[65px] flex items-center justify-center">
+              <Image
+                src="/logo/logo-02.jpeg"
+                alt="Logo"
+                fill
+                sizes="(max-width: 768px) 100px, 130px"
+                className="object-contain object-center"
+                priority
+              />
+            </div>
+          </Link>
+        </div>
 
         {/* 👇 UPDATED HUGE SEARCH BAR WITH AUTO-SUGGEST DROPDOWN */}
         <div className="hidden lg:flex flex-1 max-w-4xl mx-2 relative" ref={searchRef}>
@@ -543,6 +562,118 @@ export default function Navbar() {
           </nav>
         </div>
       </div>
+
+      {/* TIER 4: MOBILE SIDEBAR */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] flex lg:hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 transition-opacity" 
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          
+          {/* Sidebar */}
+          <div className="relative w-[85%] max-w-[320px] h-full bg-white shadow-2xl flex flex-col z-[101] overflow-y-auto animate-in slide-in-from-left duration-300">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-zinc-100 bg-zinc-50">
+              <span className="font-bold text-[#0f1b2e]">Menu</span>
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 bg-white rounded-full text-zinc-500 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Mobile Search */}
+            <div className="p-4 border-b border-zinc-100">
+              <form
+                onSubmit={(e) => {
+                  handleSearchSubmit(e);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="flex w-full border border-zinc-300 rounded-lg overflow-hidden focus-within:border-[#c69c4e] transition-all h-10"
+              >
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-3 text-sm focus:outline-none text-zinc-800 h-full"
+                />
+                <button
+                  type="submit"
+                  className="bg-[#c69c4e] text-white px-4 flex items-center justify-center h-full"
+                >
+                  <Search size={16} />
+                </button>
+              </form>
+            </div>
+
+            {/* Links */}
+            <div className="flex-1 overflow-y-auto py-2">
+              {NAV_LINKS.map((link, idx) => (
+                <div key={idx} className="border-b border-zinc-50 last:border-0">
+                  {link.dropdown ? (
+                    <div>
+                      <button
+                        onClick={() => toggleMobileCat(link.name)}
+                        className="w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-[#0f1b2e] hover:bg-zinc-50 transition-colors"
+                      >
+                        {link.name}
+                        <ChevronDown 
+                          size={16} 
+                          className={`text-zinc-400 transition-transform ${expandedMobileCats.includes(link.name) ? "rotate-180" : ""}`} 
+                        />
+                      </button>
+                      {/* Sub Items */}
+                      {expandedMobileCats.includes(link.name) && link.subItems && (
+                        <div className="bg-zinc-50/50 py-1 border-y border-zinc-50">
+                          {link.subItems.map((item, i) => {
+                            const isObject = typeof item === 'object' && item !== null;
+                            const itemName = isObject ? (item as any).name : item;
+                            return (
+                              <Link
+                                key={i}
+                                href={`/category?category=${encodeURIComponent(link.name)}&sub=${encodeURIComponent(itemName)}`}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="block px-8 py-2 text-[13px] font-medium text-zinc-600 hover:text-[#c69c4e] transition-colors"
+                              >
+                                {itemName}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      href={link.path || "#"}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center px-4 py-3 text-sm font-bold text-[#0f1b2e] hover:bg-zinc-50 transition-colors"
+                    >
+                      {link.name === "ABOUT US" && <Info size={16} className="mr-2 text-zinc-400" />}
+                      {link.name === "CONTACT" && <Phone size={16} className="mr-2 text-zinc-400" />}
+                      {link.name}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="p-4 border-t border-zinc-100 bg-zinc-50 flex flex-col gap-2">
+              <Link 
+                href="/orders"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 py-2.5 text-sm font-bold text-zinc-600 bg-white rounded-lg border border-zinc-200 shadow-sm"
+              >
+                <Truck size={16} /> Track Order
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
