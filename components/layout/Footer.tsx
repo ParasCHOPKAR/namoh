@@ -110,7 +110,7 @@ export default function Footer() {
             <p className="text-white/70 text-[13px] leading-relaxed mb-6">
               Your trusted partner for premium HORECA solutions. Quality products, reliable service, and professionalism you can count on.
             </p>
-            {/* Social Icons */}
+            {/* Social Icons - Temporarily Hidden
             <div className="flex items-center gap-4">
               <a href="#" className="w-8 h-8 rounded-full bg-white text-[#0f1b2e] flex items-center justify-center hover:bg-[#c69c4e] hover:text-white transition-colors duration-300">
                 <Facebook />
@@ -125,6 +125,7 @@ export default function Footer() {
                 <Youtube />
               </a>
             </div>
+            */}
           </div>
 
           {/* Column 2: Quick Links */}
