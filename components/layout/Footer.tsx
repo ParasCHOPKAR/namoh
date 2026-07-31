@@ -147,7 +147,7 @@ export default function Footer() {
               <FooterLink href="/profile" text="My Account" />
               <FooterLink href="/orders" text="Order Tracking" />
               <FooterLink href="/wishlist" text="Wishlist" />
-              <FooterLink href="/faq" text="Returns & Refunds" />
+              <FooterLink href="/returns" text="Returns & Refunds" />
               <FooterLink href="/faq" text="FAQs" />
             </ul>
           </div>
