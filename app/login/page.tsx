@@ -155,11 +155,11 @@ export default function LoginPage() {
               </div>
 
               {errorMsg && <p className="text-red-500 text-sm font-medium text-center">{errorMsg}</p>}
-a
+
               <button
                 type="submit"
                 disabled={loading || otp.length < 6}
-                className="w-full bg-[#c69c4e] aext-white py-3.5 rounded-xl font-bold text-[15px] hover:bg-[#b0883d] hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+                className="w-full bg-[#c69c4e] text-white py-3.5 rounded-xl font-bold text-[15px] hover:bg-[#b0883d] hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
               >
                 {loading ? <Loader2 size={20} className="animate-spin" /> : "Verify & Sign In"}
               </button>
