@@ -3,11 +3,13 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Plus, Minus, ArrowRight, ShieldCheck, ShoppingCart } from "lucide-react";
+import { Trash2, Plus, Minus, ArrowRight, ShieldCheck, ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const gst = subtotal * 0.18; 
@@ -67,9 +69,19 @@ export default function CartPage() {
                       <span className="font-extrabold text-[#0f1b2e] text-lg">
                         ₹{(item.price * item.quantity).toLocaleString()}
                       </span>
-                      <button onClick={() => removeFromCart(item.id)} className="text-zinc-400 hover:text-red-500 transition-colors p-2" title="Remove item">
-                        <Trash2 size={20} />
-                      </button>
+                      
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => toggleWishlist({ _id: item.id, name: item.name, price: item.price, image: item.image })} 
+                          className={`p-2 rounded-full transition-colors ${isInWishlist(item.id) ? 'bg-red-50 text-red-500' : 'text-zinc-400 hover:text-red-500 hover:bg-zinc-50'}`} 
+                          title={isInWishlist(item.id) ? "Remove from wishlist" : "Add to wishlist"}
+                        >
+                          <Heart size={20} className={isInWishlist(item.id) ? "fill-red-500" : ""} />
+                        </button>
+                        <button onClick={() => removeFromCart(item.id)} className="text-zinc-400 hover:text-red-500 transition-colors p-2 bg-zinc-50 hover:bg-red-50 rounded-full" title="Remove item">
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
