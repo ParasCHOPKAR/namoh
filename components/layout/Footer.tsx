@@ -9,8 +9,7 @@ import {
   PackageCheck,
   Phone,
   Mail,
-  MapPin,
-  ArrowRight
+  MapPin
 } from "lucide-react";
 
 // --- CUSTOM SVG SOCIAL ICONS ---
@@ -171,27 +170,20 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 5: Newsletter */}
+          {/* Column 5: Location */}
           <div className="footer-column lg:col-span-1">
-            <h4 className="font-bold text-sm uppercase tracking-wider mb-6">Newsletter</h4>
-            <p className="text-white/70 text-[13px] mb-4 leading-relaxed">
-              Subscribe to get updates on new arrivals, offers & more.
-            </p>
-            <form className="flex mb-6" onSubmit={(e) => e.preventDefault()}>
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="w-full bg-white text-[#0f1b2e] px-4 py-2.5 text-[13px] outline-none placeholder:text-zinc-400"
-                required
-              />
-              <button 
-                type="submit" 
-                className="bg-[#c69c4e] text-white px-4 py-2.5 flex items-center justify-center hover:bg-[#a6823f] transition-colors"
-                aria-label="Subscribe"
-              >
-                <ArrowRight size={18} strokeWidth={2} />
-              </button>
-            </form>
+            <h4 className="font-bold text-sm uppercase tracking-wider mb-6">Our Location</h4>
+            <div className="w-full h-[120px] mb-6 rounded-lg overflow-hidden border border-white/10 shadow-inner">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d121058.93187063264!2d73.78056580978644!3d18.52476140510167!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2bf2e67461101%3A0x828d43bf9d9ee343!2sPune%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1716301234567!5m2!1sen!2sin" 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0 }} 
+                allowFullScreen={false} 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
             
             {/* Payment Icons Placeholder */}
             <div className="flex items-center gap-2 bg-white px-2 py-1.5 w-max rounded-sm">
