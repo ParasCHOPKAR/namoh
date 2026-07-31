@@ -132,9 +132,9 @@ export default function Footer() {
             <h4 className="font-bold text-sm uppercase tracking-wider mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <FooterLink href="/about" text="About Us" />
-              <FooterLink href="/category?category=BRANDS" text="Our Brands" />
-              <FooterLink href="/contact" text="Bulk Orders" />
-              <FooterLink href="/category" text="Master Catalog" />
+              <FooterLink href="/brands" text="Our Brands" />
+              <FooterLink href="/bulk-orders" text="Bulk Orders" />
+              <FooterLink href="/catalog" text="Master Catalog" />
               <FooterLink href="/contact" text="Contact Us" />
             </ul>
           </div>
@@ -146,7 +146,7 @@ export default function Footer() {
               <FooterLink href="/profile" text="My Account" />
               <FooterLink href="/orders" text="Order Tracking" />
               <FooterLink href="/wishlist" text="Wishlist" />
-              <FooterLink href="/returns" text="Returns & Refunds" />
+              <FooterLink href="/faq" text="Returns & Refunds" />
               <FooterLink href="/faq" text="FAQs" />
             </ul>
           </div>
