@@ -35,6 +35,7 @@ export default function AdminDashboard() {
   const [fetchingOrders, setFetchingOrders] = useState(false);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [orderTimeFilter, setOrderTimeFilter] = useState("All Time");
+  const [customDate, setCustomDate] = useState("");
 
   // --- PRODUCTS STATE ---
   const [products, setProducts] = useState<any[]>([]);
@@ -264,11 +265,18 @@ export default function AdminDashboard() {
         return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
       } else if (orderTimeFilter === "This Year") {
         return orderDate.getFullYear() === now.getFullYear();
+      } else if (orderTimeFilter === "Custom Date" && customDate) {
+        const selectedDate = new Date(customDate);
+        return orderDate.getFullYear() === selectedDate.getFullYear() && 
+               orderDate.getMonth() === selectedDate.getMonth() && 
+               orderDate.getDate() === selectedDate.getDate();
       }
+      
+      if (orderTimeFilter === "Custom Date" && !customDate) return true;
       
       return true;
     });
-  }, [orders, orderTimeFilter]);
+  }, [orders, orderTimeFilter, customDate]);
 
   const exportToCSV = () => {
     if (filteredOrders.length === 0) return alert("No orders to export!");
@@ -646,7 +654,16 @@ export default function AdminDashboard() {
                   <option value="This Week">This Week</option>
                   <option value="This Month">This Month</option>
                   <option value="This Year">This Year</option>
+                  <option value="Custom Date">Custom Date</option>
                 </select>
+                {orderTimeFilter === "Custom Date" && (
+                  <input
+                    type="date"
+                    value={customDate}
+                    onChange={(e) => setCustomDate(e.target.value)}
+                    className="w-full sm:w-auto px-4 py-3 bg-white border border-zinc-200 rounded-xl text-sm font-bold text-[#0f1b2e] focus:outline-none focus:border-[#c69c4e] focus:ring-1 focus:ring-[#c69c4e] transition-all shadow-sm"
+                  />
+                )}
                 <button
                   onClick={exportToCSV}
                   className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-[#c69c4e] hover:bg-[#b08940] text-white rounded-xl font-bold text-sm transition-all shadow-sm"
