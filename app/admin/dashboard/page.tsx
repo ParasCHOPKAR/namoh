@@ -34,6 +34,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [fetchingOrders, setFetchingOrders] = useState(false);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [orderTimeFilter, setOrderTimeFilter] = useState("All Time");
 
   // --- PRODUCTS STATE ---
   const [products, setProducts] = useState<any[]>([]);
@@ -243,6 +244,31 @@ export default function AdminDashboard() {
       return matchesCategory && matchesSub && matchesSearch;
     });
   }, [products, selectedCategory, selectedSubCategory, selectedChildCategory, searchTerm]);
+
+  const filteredOrders = useMemo(() => {
+    if (orderTimeFilter === "All Time") return orders;
+    
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return orders.filter(order => {
+      const orderDate = new Date(order.createdAt);
+      
+      if (orderTimeFilter === "Today") {
+        return orderDate >= today;
+      } else if (orderTimeFilter === "This Week") {
+        const firstDayOfWeek = new Date(today);
+        firstDayOfWeek.setDate(today.getDate() - today.getDay());
+        return orderDate >= firstDayOfWeek;
+      } else if (orderTimeFilter === "This Month") {
+        return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+      } else if (orderTimeFilter === "This Year") {
+        return orderDate.getFullYear() === now.getFullYear();
+      }
+      
+      return true;
+    });
+  }, [orders, orderTimeFilter]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -568,10 +594,23 @@ export default function AdminDashboard() {
         {/* ===================== VIEW: MANAGE ORDERS ===================== */}
         {activeTab === "orders" && (
           <div className="max-w-6xl mx-auto animate-in fade-in">
-            <div className="mb-10 mt-4 flex items-end justify-between">
+            <div className="mb-10 mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-extrabold text-[#0f1b2e] mb-2">Manage Orders</h1>
                 <p className="text-zinc-500 font-medium">Track and update customer order statuses.</p>
+              </div>
+              <div className="w-full sm:w-48 shrink-0">
+                <select
+                  value={orderTimeFilter}
+                  onChange={(e) => setOrderTimeFilter(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-sm font-bold text-[#0f1b2e] focus:outline-none focus:border-[#c69c4e] focus:ring-1 focus:ring-[#c69c4e] transition-all cursor-pointer shadow-sm"
+                >
+                  <option value="All Time">All Time</option>
+                  <option value="Today">Today (Day-wise)</option>
+                  <option value="This Week">This Week</option>
+                  <option value="This Month">This Month</option>
+                  <option value="This Year">This Year</option>
+                </select>
               </div>
             </div>
 
@@ -580,9 +619,9 @@ export default function AdminDashboard() {
                 <Loader2 size={40} className="animate-spin mb-4 text-[#c69c4e]" />
                 <p className="font-bold tracking-wider uppercase text-sm">Loading Orders...</p>
               </div>
-            ) : orders.length === 0 ? (
+            ) : filteredOrders.length === 0 ? (
               <div className="bg-white border border-zinc-200 rounded-2xl p-12 text-center text-zinc-500 font-medium">
-                No orders have been placed yet.
+                No orders found for the selected time filter.
               </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden">
@@ -597,7 +636,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
-                      {orders.map((order) => (
+                      {filteredOrders.map((order) => (
                         <React.Fragment key={order._id}>
                           {/* MAIN ROW */}
                           <tr className={`transition-colors ${expandedOrderId === order._id ? "bg-zinc-50" : "hover:bg-zinc-50/50"}`}>
