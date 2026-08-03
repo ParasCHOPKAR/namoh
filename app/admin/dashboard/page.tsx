@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { 
   PackagePlus, Upload, LayoutDashboard, Settings, LogOut, 
   CheckCircle2, X, ClipboardList, Loader2, ChevronDown, 
-  ChevronUp, MapPin, Phone, Mail, User, Search, Trash2, Edit 
+  ChevronUp, MapPin, Phone, Mail, User, Search, Trash2, Edit, Download 
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { CldUploadWidget } from "next-cloudinary";
@@ -269,6 +269,42 @@ export default function AdminDashboard() {
       return true;
     });
   }, [orders, orderTimeFilter]);
+
+  const exportToCSV = () => {
+    if (filteredOrders.length === 0) return alert("No orders to export!");
+
+    const headers = [
+      "Order ID", "Date", "Customer Name", "Email", "Phone", 
+      "Address", "City", "State", "PIN Code", "Total Amount (Rs)", "Delivery Status"
+    ];
+
+    const rows = filteredOrders.map(order => [
+      order.razorpayOrderId || order._id,
+      new Date(order.createdAt).toLocaleDateString(),
+      `"${(order.customerDetails?.fullName || '').replace(/"/g, '""')}"`,
+      `"${(order.userEmail || '').replace(/"/g, '""')}"`,
+      `"${(order.customerDetails?.phone || '').replace(/"/g, '""')}"`,
+      `"${(order.customerDetails?.streetAddress || '').replace(/"/g, '""')}"`,
+      `"${(order.customerDetails?.city || '').replace(/"/g, '""')}"`,
+      `"${(order.customerDetails?.state || '').replace(/"/g, '""')}"`,
+      `"${(order.customerDetails?.pinCode || '').replace(/"/g, '""')}"`,
+      order.pricing?.total || 0,
+      order.orderStatus || 'Pending'
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `orders_${orderTimeFilter.replace(/\s+/g, '_').toLowerCase()}.csv`);
+    link.style.visibility = "hidden";
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -599,11 +635,11 @@ export default function AdminDashboard() {
                 <h1 className="text-3xl font-extrabold text-[#0f1b2e] mb-2">Manage Orders</h1>
                 <p className="text-zinc-500 font-medium">Track and update customer order statuses.</p>
               </div>
-              <div className="w-full sm:w-48 shrink-0">
+              <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3 shrink-0">
                 <select
                   value={orderTimeFilter}
                   onChange={(e) => setOrderTimeFilter(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl text-sm font-bold text-[#0f1b2e] focus:outline-none focus:border-[#c69c4e] focus:ring-1 focus:ring-[#c69c4e] transition-all cursor-pointer shadow-sm"
+                  className="w-full sm:w-48 px-4 py-3 bg-white border border-zinc-200 rounded-xl text-sm font-bold text-[#0f1b2e] focus:outline-none focus:border-[#c69c4e] focus:ring-1 focus:ring-[#c69c4e] transition-all cursor-pointer shadow-sm"
                 >
                   <option value="All Time">All Time</option>
                   <option value="Today">Today (Day-wise)</option>
@@ -611,6 +647,12 @@ export default function AdminDashboard() {
                   <option value="This Month">This Month</option>
                   <option value="This Year">This Year</option>
                 </select>
+                <button
+                  onClick={exportToCSV}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 bg-[#c69c4e] hover:bg-[#b08940] text-white rounded-xl font-bold text-sm transition-all shadow-sm"
+                >
+                  <Download size={18} /> Export Excel (CSV)
+                </button>
               </div>
             </div>
 
