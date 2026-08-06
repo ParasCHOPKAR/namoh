@@ -111,8 +111,12 @@ export default function ContactPage() {
                 Guruwar Peth, Krishna Hatti Chowk,<br />
                 Pune-411042
               </p>
-              <div className="flex items-center gap-2 text-sm font-bold text-[#c69c4e]">
-                <Clock size={16} /> Mon-Sat, 9:00 AM - 6:00 PM
+              <div className="flex items-start gap-2 text-sm font-bold text-[#c69c4e]">
+                <Clock size={16} className="mt-0.5 shrink-0" /> 
+                <div>
+                  Time - 10.00 am to 8.00 pm<br />
+                  <span className="text-zinc-500 font-medium">Sunday closed</span>
+                </div>
               </div>
             </div>
 
