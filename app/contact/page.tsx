@@ -130,14 +130,14 @@ export default function ContactPage() {
                   <Package className="text-zinc-400 shrink-0 mt-0.5" size={18} />
                   <div>
                     <p className="text-xs font-bold tracking-wider text-zinc-400 uppercase mb-1">Bulk & Wholesale</p>
-                    <a href="tel:+919876543210" className="text-lg font-bold hover:text-[#c69c4e] transition-colors">+91 98765 43210</a>
+                    <a href="tel:+918788051004" className="text-lg font-bold hover:text-[#c69c4e] transition-colors">+91 8788051004</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Building2 className="text-zinc-400 shrink-0 mt-0.5" size={18} />
                   <div>
                     <p className="text-xs font-bold tracking-wider text-zinc-400 uppercase mb-1">General Inquiries</p>
-                    <a href="tel:+919876543211" className="text-lg font-bold hover:text-[#c69c4e] transition-colors">+91 98765 43211</a>
+                    <a href="tel:+918788051004" className="text-lg font-bold hover:text-[#c69c4e] transition-colors">+91 8788051004</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 pt-2">
