@@ -163,26 +163,26 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-[#0f1b2e] mb-2">Full Name *</label>
-                    <input required type="text" name="fullName" value={address.fullName} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors" />
+                    <input required type="text" name="fullName" value={address.fullName} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors text-zinc-900" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-[#0f1b2e] mb-2">Phone Number *</label>
-                    <input required type="tel" name="phone" value={address.phone} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors" />
+                    <input required type="tel" name="phone" value={address.phone} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors text-zinc-900" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-[#0f1b2e] mb-2">PIN Code *</label>
-                    <input required type="text" name="pinCode" value={address.pinCode} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors" />
+                    <input required type="text" name="pinCode" value={address.pinCode} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors text-zinc-900" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-[#0f1b2e] mb-2">City *</label>
-                    <input required type="text" name="city" value={address.city} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors" />
+                    <input required type="text" name="city" value={address.city} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors text-zinc-900" />
                   </div>
                   <div className="col-span-2 md:col-span-1">
                     <label className="block text-sm font-bold text-[#0f1b2e] mb-2">State *</label>
-                    <select name="state" value={address.state} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors">
+                    <select name="state" value={address.state} onChange={handleAddressChange} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors text-zinc-900">
                       <option>Maharashtra</option>
                       <option>Gujarat</option>
                       <option>Karnataka</option>
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
 
                 <div>
                   <label className="block text-sm font-bold text-[#0f1b2e] mb-2">Complete Street Address *</label>
-                  <input required type="text" name="streetAddress" value={address.streetAddress} onChange={handleAddressChange} placeholder="House/Flat No., Building Name, Street" className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors" />
+                  <input required type="text" name="streetAddress" value={address.streetAddress} onChange={handleAddressChange} placeholder="House/Flat No., Building Name, Street" className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:border-[#c69c4e] transition-colors text-zinc-900" />
                 </div>
 
                 <div className="pt-6 border-t border-zinc-100 flex justify-end">
