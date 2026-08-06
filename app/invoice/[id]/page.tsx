@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import connectDB from "@/lib/db";
 import Order from "@/lib/models/Order";
 
@@ -40,8 +41,9 @@ export default async function InvoicePage({ params }: any) {
           {/* Header */}
           <div className="flex justify-between items-start border-b border-zinc-200 pb-8 mb-8">
             <div>
+              <Image src="/logo/logo-01-bg-remove.png" alt="Namoh Logo" width={160} height={60} className="mb-4" />
               <h1 className="text-3xl font-black text-[#0f1b2e] tracking-tighter">TAX INVOICE</h1>
-              <p className="text-zinc-500 font-medium mt-1">Namoh Horeca Solutions</p>
+              <p className="text-zinc-500 font-medium mt-1">Namoh</p>
             </div>
             <div className="text-right">
               <p className="text-sm font-bold text-zinc-800">Order ID:</p>
@@ -63,7 +65,7 @@ export default async function InvoicePage({ params }: any) {
             </div>
             <div className="text-right">
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Sold By</p>
-              <p className="font-bold text-[#0f1b2e]">Namoh Horeca Solutions</p>
+              <p className="font-bold text-[#0f1b2e]">Namoh</p>
               <p className="text-sm text-zinc-600 mt-1">Sr No.429, Siddhi Height, Guruwar Peth, Krishna Hatti Chowk</p>
               <p className="text-sm text-zinc-600">Pune-411042</p>
               <p className="text-sm text-zinc-600 mt-2">GSTIN: 27AABCU9603R1ZM</p>
@@ -117,7 +119,7 @@ export default async function InvoicePage({ params }: any) {
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-zinc-200 text-center text-xs text-zinc-400">
             <p>This is a computer-generated invoice and does not require a physical signature.</p>
-            <p className="mt-1">Thank you for shopping with Namoh Horeca Solutions!</p>
+            <p className="mt-1">Thank you for shopping with Namoh!</p>
           </div>
 
         </div>
