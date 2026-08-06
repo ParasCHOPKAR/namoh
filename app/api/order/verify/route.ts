@@ -30,7 +30,9 @@ export async function POST(req: Request) {
 
     // Save the authentic order to the database
     await connectDB();
+    const customOrderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
     const newOrder = await Order.create({
+      orderId: customOrderId,
       userEmail: session.user.email,
       razorpayOrderId: razorpay_order_id,
       razorpayPaymentId: razorpay_payment_id,

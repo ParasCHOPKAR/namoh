@@ -287,7 +287,7 @@ export default function AdminDashboard() {
     ];
 
     const rows = filteredOrders.map(order => [
-      order.razorpayOrderId || order._id,
+      order.orderId || order.razorpayOrderId || order._id,
       new Date(order.createdAt).toLocaleDateString(),
       `"${(order.customerDetails?.fullName || '').replace(/"/g, '""')}"`,
       `"${(order.userEmail || '').replace(/"/g, '""')}"`,
@@ -705,7 +705,7 @@ export default function AdminDashboard() {
                                 className="flex items-center gap-2 font-bold text-[#0f1b2e] text-sm hover:text-[#c69c4e] transition-colors text-left"
                               >
                                 {expandedOrderId === order._id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                {order.razorpayOrderId || order._id}
+                                {order.orderId || order.razorpayOrderId || order._id}
                               </button>
                               <p className="text-xs text-zinc-500 mt-1 ml-6">{new Date(order.createdAt).toLocaleDateString()}</p>
                             </td>

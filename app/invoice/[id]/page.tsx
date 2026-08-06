@@ -47,7 +47,7 @@ export default async function InvoicePage({ params }: any) {
             </div>
             <div className="text-right">
               <p className="text-sm font-bold text-zinc-800">Order ID:</p>
-              <p className="text-sm text-zinc-500 font-mono mb-2">{order.razorpayOrderId || order._id}</p>
+              <p className="text-sm text-zinc-500 font-mono mb-2">{order.orderId || order.razorpayOrderId || order._id}</p>
               <p className="text-sm font-bold text-zinc-800">Date:</p>
               <p className="text-sm text-zinc-500">{new Date(order.createdAt).toLocaleDateString()}</p>
             </div>

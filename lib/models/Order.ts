@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, models } from "mongoose";
 
 export interface IOrder extends Document {
+  orderId?: string;
   userEmail: string; // Linking to the user
   razorpayOrderId: string;
   razorpayPaymentId?: string;
@@ -20,6 +21,7 @@ export interface IOrder extends Document {
 }
 
 const OrderSchema = new Schema<IOrder>({
+    orderId: { type: String, unique: true, sparse: true },
     userEmail: { type: String, required: true },
     razorpayOrderId: { type: String, required: true, unique: true },
     razorpayPaymentId: { type: String },
