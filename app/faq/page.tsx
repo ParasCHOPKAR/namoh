@@ -22,7 +22,7 @@ const FAQ_DATA: FAQItem[] = [
   {
     category: "general",
     question: "Where is your showroom located?",
-    answer: "Our main showroom is located at 123 Commercial Hub, Industrial Area Phase 1, Pune, Maharashtra 411001. We welcome businesses and hospitality professionals to visit us to inspect the quality of our collections firsthand."
+    answer: "Our main showroom is located at Sr No.429, Siddhi Height, Guruwar Peth, Krishna Hatti Chowk, Pune-411042. We welcome businesses and hospitality professionals to visit us to inspect the quality of our collections firsthand."
   },
   {
     category: "general",

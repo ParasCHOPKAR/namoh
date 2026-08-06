@@ -107,9 +107,9 @@ export default function ContactPage() {
               </div>
               <h3 className="text-xl font-bold text-[#0f1b2e] mb-3">Headquarters</h3>
               <p className="text-zinc-600 font-medium leading-relaxed mb-4">
-                123 Commercial Hub,<br />
-                Industrial Area Phase 1,<br />
-                Pune, Maharashtra 411001
+                Sr No.429, Siddhi Height,<br />
+                Guruwar Peth, Krishna Hatti Chowk,<br />
+                Pune-411042
               </p>
               <div className="flex items-center gap-2 text-sm font-bold text-[#c69c4e]">
                 <Clock size={16} /> Mon-Sat, 9:00 AM - 6:00 PM
@@ -137,7 +137,7 @@ export default function ContactPage() {
                   <Building2 className="text-zinc-400 shrink-0 mt-0.5" size={18} />
                   <div>
                     <p className="text-xs font-bold tracking-wider text-zinc-400 uppercase mb-1">General Inquiries</p>
-                    <a href="tel:+918788051004" className="text-lg font-bold hover:text-[#c69c4e] transition-colors">+91 8788051004</a>
+                    <a href="tel:+918788359353" className="text-lg font-bold hover:text-[#c69c4e] transition-colors">+91 8788359353</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 pt-2">

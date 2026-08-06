@@ -64,8 +64,8 @@ export default async function InvoicePage({ params }: any) {
             <div className="text-right">
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Sold By</p>
               <p className="font-bold text-[#0f1b2e]">Namoh Horeca Solutions</p>
-              <p className="text-sm text-zinc-600 mt-1">123 Industrial Estate</p>
-              <p className="text-sm text-zinc-600">Pune, Maharashtra - 411057</p>
+              <p className="text-sm text-zinc-600 mt-1">Sr No.429, Siddhi Height, Guruwar Peth, Krishna Hatti Chowk</p>
+              <p className="text-sm text-zinc-600">Pune-411042</p>
               <p className="text-sm text-zinc-600 mt-2">GSTIN: 27AABCU9603R1ZM</p>
             </div>
           </div>

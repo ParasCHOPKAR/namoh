@@ -158,7 +158,7 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-white/70 text-[13px] leading-relaxed">
                 <MapPin size={16} className="shrink-0 mt-0.5 text-[#c69c4e]" />
-                <span>Pune, Maharashtra,<br />India</span>
+                <span>Sr No.429, Siddhi Height,<br />Guruwar Peth, Krishna Hatti Chowk,<br />Pune-411042</span>
               </li>
               <li className="flex items-start gap-3 text-white/70 text-[13px]">
                 <Phone size={16} className="shrink-0 mt-0.5 text-[#c69c4e]" />
